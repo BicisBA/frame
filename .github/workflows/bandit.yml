@@ -11,8 +11,6 @@ jobs:
       with:
         python-version: 3.8
     - name: Install dependencies
-      run: pip install poetry
-    - name: Install pre-commit
-      run: poetry run pip install pre-commit
+      run: pip install bandit
     - name: Run bandit
-      run: poetry run pre-commit run bandit
+      run: bandit -c pyproject.toml -r api
