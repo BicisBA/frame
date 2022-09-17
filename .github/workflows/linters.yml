@@ -1,0 +1,24 @@
+name: Linters
+on: [push]
+
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: pip install poetry
+    - name: Install pre-commit
+      run: poetry run pip install pre-commit
+    - name: Run isort
+      run: poetry run pre-commit run isort
+    - name: Run black
+      run: poetry run pre-commit run black
+    - name: Run pylint
+      run: poetry run pre-commit run pylint
+    - name: Run mypy
+      run: poetry run pre-commit run mypy

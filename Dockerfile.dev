@@ -1,0 +1,9 @@
+# TODO: unify Dockerfiles
+FROM python:3.10-bullseye
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y postgresql-client && \
+  pip install poetry
+COPY pyproject.toml poetry.lock ./
+ENV POETRY_VIRTUALENVS_IN_PROJECT false
+RUN poetry install
