@@ -31,7 +31,7 @@ async def auth_middleware(request: Request, call_next):
         response = await call_next(request)
         return response
 
-    if cfg.ENV(default=Environments.PROD.value, cast=Environments) == Environments.PROD:
+    if cfg.env(default=Environments.PROD.value, cast=Environments) == Environments.PROD:
         auth_header: str | None = request.headers.get("Authorization")
         if auth_header is None:
             return JSONResponse(
