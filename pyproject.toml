@@ -16,7 +16,7 @@ youconfigme = "^0.9.0"
 alembic = "^1.8.1"
 typer = "^0.6.1"
 psycopg2-binary = "^2.9.3"
-setuptools = "65.0.0"
+setuptools = "65.3.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
