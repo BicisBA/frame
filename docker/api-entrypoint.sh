@@ -1,4 +1,6 @@
 #!/bin/bash
+poetry install
+
 /app/docker/wait-for-postgres.sh
 
 echo 'upgrading db'
