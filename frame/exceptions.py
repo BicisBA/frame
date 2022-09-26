@@ -1,0 +1,2 @@
+class StationDoesNotExist(Exception):
+    pass
