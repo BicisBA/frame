@@ -1,14 +1,19 @@
 import secrets
+from typing import List
 
-from fastapi import FastAPI, Request
-from fastapi.security import HTTPBasic
-from fastapi.responses import JSONResponse
+from fastapi import Depends, FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
 
+from frame.api.schemas import stations as station_schemas
+from frame.api.services import stations as station_service
 from frame.config import cfg
-from frame.utils import get_logger
 from frame.constants import Environments
+from frame.exceptions import StationDoesNotExist
 from frame.models.base import SessionLocal
+from frame.utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -20,33 +25,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-security = HTTPBasic()
-
-
-@app.middleware("http")
-async def auth_middleware(request: Request, call_next):
-    logger.info(request.url.path)
-    if request.url.path in ("/docs", "/openapi.json"):
-        response = await call_next(request)
-        return response
-
-    if cfg.env(default=Environments.PROD.value, cast=Environments) == Environments.PROD:
-        auth_header: str | None = request.headers.get("Authorization")
-        if auth_header is None:
-            return JSONResponse(
-                status_code=401,
-                content={"message": "Message is missing"},
-            )
-        if not secrets.compare_digest(
-            auth_header.encode("utf8"), cfg.api_secret.encode("utf8")
-        ):
-            return JSONResponse(
-                status_code=401,
-                content={"message": "Secret is wrong."},
-            )
-    response = await call_next(request)
-    return response
+app.add_middleware(GZipMiddleware, minimum_size=256)
 
 
 # Dependency
@@ -61,3 +40,16 @@ def get_db():
 @app.get("/hello")
 def say_hi():
     return JSONResponse(status_code=200, content={"message": "hi"})
+
+
+@app.get("/stations", response_model=List[station_schemas.Station])
+def get_stations(db: Session = Depends(get_db)):
+    return station_service.get_stations(db)
+
+
+@app.get("/stations/{station_id}", response_model=station_schemas.Station)
+def get_station(station_id: int, db: Session = Depends(get_db)):
+    try:
+        return station_service.get_station(station_id, db)
+    except StationDoesNotExist:
+        raise HTTPException(status_code=404, detail="Station does not exist")
