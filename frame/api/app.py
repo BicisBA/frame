@@ -5,6 +5,7 @@ from fastapi import Depends, FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
+from fastapi_utils.tasks import repeat_every
 from sqlalchemy.orm import Session
 
 from frame.api.schemas import stations as station_schemas
@@ -37,9 +38,22 @@ def get_db():
         db.close()
 
 
-@app.get("/hello")
-def say_hi():
-    return JSONResponse(status_code=200, content={"message": "hi"})
+@app.on_event("startup")
+@repeat_every(seconds=86400, max_repetitions=1, logger=logger)
+def refresh_stations_info() -> None:
+    logger.info("Refreshing stations info")
+    db = SessionLocal()
+    station_service.update_stations_info(db)
+    db.close()
+
+
+@app.on_event("startup")
+@repeat_every(seconds=30, max_repetitions=1, logger=logger)
+def refresh_stations_status() -> None:
+    logger.info("Refreshing stations status")
+    db = SessionLocal()
+    station_service.update_stations_status(db)
+    db.close()
 
 
 @app.get("/stations", response_model=List[station_schemas.Station])
@@ -47,9 +61,22 @@ def get_stations(db: Session = Depends(get_db)):
     return station_service.get_stations(db)
 
 
+@app.get('/stations/status', response_model=List[station_schemas.StationStatus])
+def get_stations_status(db: Session =  Depends(get_db)):
+    return station_service.get_stations_status(db)
+
+
 @app.get("/stations/{station_id}", response_model=station_schemas.Station)
 def get_station(station_id: int, db: Session = Depends(get_db)):
     try:
         return station_service.get_station(station_id, db)
+    except StationDoesNotExist:
+        raise HTTPException(status_code=404, detail="Station does not exist")
+
+
+@app.get("/stations/{station_id}/status", response_model=station_schemas.StationStatus)
+def get_station_status(station_id: int, db: Session = Depends(get_db)):
+    try:
+        return station_service.get_station_status(station_id, db)
     except StationDoesNotExist:
         raise HTTPException(status_code=404, detail="Station does not exist")

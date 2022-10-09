@@ -11,3 +11,8 @@ class Environments(enum.Enum):
     DEV = "dev"
     PROD = "prod"
     TEST = "test"
+
+ECOBICI_API = 'https://apitransporte.buenosaires.gob.ar/ecobici/gbfs/{endpoint}?client_id={client_id}&client_secret={client_secret}'
+
+STATUS_ENDPOINT = 'stationStatus'
+STATIONS_ENDPOINT = 'stationInformation'
