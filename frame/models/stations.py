@@ -13,10 +13,10 @@ from sqlalchemy import (
     CheckConstraint,
 )
 
-from frame.models.base import Base
+from frame.models.base import Base, UpdatableBase
 
 
-class Station(Base):
+class Station(Base, UpdatableBase):
     """An EcoBici station."""
 
     __tablename__ = "stations"
@@ -28,7 +28,7 @@ class Station(Base):
     capacity = Column(Integer)
 
 
-class StationStatus(Base):
+class StationStatus(Base, UpdatableBase):
     """An EcoBici station status."""
 
     __tablename__ = "stations_status"
