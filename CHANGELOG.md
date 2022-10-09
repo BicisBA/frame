@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0] - 2022-10-08
 ### Added
+- Stations' status endpoint
 - Replica of EcoBici's endpoints to avoid issuing too many queries
 - On startup and periodic querying to the EcoBici API to fetch latest data
 

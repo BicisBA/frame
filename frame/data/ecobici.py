@@ -6,16 +6,11 @@ from pydantic import BaseModel
 
 from frame.utils import get_logger
 from frame.config import BA_BIKES_CREDS
+from frame.constants import ECOBICI_API, STATUS_ENDPOINT, STATIONS_ENDPOINT
 
 logger = get_logger(__name__)
 
-BASE_URL = partial(
-    "https://apitransporte.buenosaires.gob.ar/ecobici/gbfs/{endpoint}?client_id={client_id}&client_secret={client_secret}".format,  # noqa: E501
-    **BA_BIKES_CREDS
-)
-
-STATUS_ENDPOINT = "stationStatus"
-STATIONS_ENDPOINT = "stationInformation"
+BASE_URL = partial(ECOBICI_API.format, **BA_BIKES_CREDS)  # noqa: E501
 
 
 class EcobiciStationStatus(BaseModel):
@@ -53,6 +48,7 @@ class EcobiciStationInfo(BaseModel):
 
 
 def fetch_stations_status() -> List[EcobiciStationStatus]:
+    """Fetch stations' status from the EcoBici API."""
     logger.info("Fetching stations status from API")
     url = BASE_URL(endpoint=STATUS_ENDPOINT)
     response = requests.get(url, timeout=120)
@@ -65,6 +61,7 @@ def fetch_stations_status() -> List[EcobiciStationStatus]:
 
 
 def fetch_stations_info() -> List[EcobiciStationInfo]:
+    """Fetch information on all stations from the EcoBici API."""
     logger.info("Fetching stations information from API")
     url = BASE_URL(endpoint=STATIONS_ENDPOINT)
     response = requests.get(url, timeout=120)
