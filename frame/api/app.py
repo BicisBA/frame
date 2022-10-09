@@ -1,20 +1,16 @@
-import secrets
 from typing import List
 
-from fastapi import Depends, FastAPI, Request, HTTPException
+from sqlalchemy.orm import Session
+from fastapi_utils.tasks import repeat_every
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import JSONResponse
-from fastapi_utils.tasks import repeat_every
-from sqlalchemy.orm import Session
+from fastapi import Depends, FastAPI, HTTPException
 
+from frame.utils import get_logger
+from frame.models.base import SessionLocal
+from frame.exceptions import StationDoesNotExist
 from frame.api.schemas import stations as station_schemas
 from frame.api.services import stations as station_service
-from frame.config import cfg
-from frame.constants import Environments
-from frame.exceptions import StationDoesNotExist
-from frame.models.base import SessionLocal
-from frame.utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -61,8 +57,8 @@ def get_stations(db: Session = Depends(get_db)):
     return station_service.get_stations(db)
 
 
-@app.get('/stations/status', response_model=List[station_schemas.StationStatus])
-def get_stations_status(db: Session =  Depends(get_db)):
+@app.get("/stations/status", response_model=List[station_schemas.StationStatus])
+def get_stations_status(db: Session = Depends(get_db)):
     return station_service.get_stations_status(db)
 
 

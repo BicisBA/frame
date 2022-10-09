@@ -1,8 +1,7 @@
 """Entity to represent an EcoBici station"""
 # pylint: disable=too-few-public-methods
 
-from sqlalchemy import Column, String, Boolean, Integer, Numeric, DateTime
-from sqlalchemy.sql import func
+from sqlalchemy import Column, String, Integer, Numeric
 
 from frame.models.base import Base
 

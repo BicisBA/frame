@@ -19,6 +19,7 @@ psycopg2-binary = "^2.9.3"
 setuptools = "65.3.0"
 requests = "^2.28.1"
 fastapi-utils = "^0.2.1"
+types-requests = "^2.28.11"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
@@ -33,7 +34,7 @@ pycln = "^2.1.1"
 frame = "frame.cli.cli:cli"
 
 [tool.pylint."MESSAGES CONTROL"]
-disable = [ "C", "fixme", "too-few-public-methods", "R0801"]
+disable = [ "C", "fixme", "too-few-public-methods", "R0801", "no-name-in-module", "W0707"]
 
 [tool.pylint.MASTER]
 jobs = 1

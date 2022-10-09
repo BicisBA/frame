@@ -1,10 +1,9 @@
 import typer
 
-from frame.config import cfg
-from frame.data.ecobici import fetch_stations
-from frame.models.base import SessionLocal
-from frame.models.stations import Station
 from frame.utils import get_logger
+from frame.models.stations import Station
+from frame.models.base import SessionLocal
+from frame.data.ecobici import fetch_stations
 
 logger = get_logger(__name__)
 
@@ -20,7 +19,9 @@ def download():
     for station in stations:
         station_id = station.pop("station_id")
         station["id"] = station_id
-        station = {k: v for k, v in station.items() if k in Station.__table__.columns.keys()}
+        station = {
+            k: v for k, v in station.items() if k in Station.__table__.columns.keys()
+        }
         db.add(Station(**station))
     db.commit()
     db.close()
