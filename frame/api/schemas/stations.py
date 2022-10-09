@@ -25,3 +25,18 @@ class StationStatus(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class PredictionParams(BaseModel):
+    user_eta: int
+    user_lat: float
+    user_lon: float
+
+
+class Prediction(PredictionParams):
+    station_id: int
+    bike_availability_probability: float
+    bike_eta: float
+
+    class Config:
+        orm_mode = True

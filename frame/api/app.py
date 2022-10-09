@@ -76,3 +76,17 @@ def get_station_status(station_id: int, db: Session = Depends(get_db)):
         return station_service.get_station_status(station_id, db)
     except StationDoesNotExist:
         raise HTTPException(status_code=404, detail="Station does not exist")
+
+
+@app.post(
+    "/stations/{station_id}/prediction", response_model=station_schemas.Prediction
+)
+def predict_for_station(
+    station_id: int,
+    prediction_params: station_schemas.PredictionParams,
+    db: Session = Depends(get_db),
+):
+    try:
+        return station_service.predict(station_id, prediction_params, db)
+    except StationDoesNotExist:
+        raise HTTPException(status_code=404, detail="Station does not exist")

@@ -1,3 +1,3 @@
-from .stations import Station, StationStatus
+from .stations import Station, Prediction, StationStatus
 
-__all__ = ["Station", "StationStatus"]
+__all__ = ["Station", "StationStatus", "Prediction"]
