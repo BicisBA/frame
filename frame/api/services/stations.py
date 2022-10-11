@@ -52,12 +52,12 @@ def update_stations_info(db: Session) -> None:
 def update_stations_status(db: Session) -> None:
     """Update stations status with the latest data from the API."""
     stations_status = fetch_stations_status()
-    stations = set(x.station_id for x in get_stations(db))
 
     columns = StationStatus.__table__.columns.keys()
 
     for station_status in stations_status:
-        if station_status["station_id"] not in stations:
+        if station_status["status"] == "END_OF_LIFE":
+            logger.info("Skipping %s, since it's marked as EOL", station_status)
             continue
 
         new_station_status: StationStatus

@@ -54,7 +54,10 @@ def fetch_stations_status() -> List[EcobiciStationStatus]:
     response = requests.get(url, timeout=120)
     try:
         response.raise_for_status()
-        return response.json()["data"]["stations"]
+        stations_status = response.json()["data"]["stations"]
+        for station_status in stations_status:
+            station_status["station_id"] = int(station_status["station_id"])
+        return stations_status
     except requests.exceptions.HTTPError:
         logger.error("Error fetching stations status from API", exc_info=True)
         raise
@@ -67,7 +70,10 @@ def fetch_stations_info() -> List[EcobiciStationInfo]:
     response = requests.get(url, timeout=120)
     try:
         response.raise_for_status()
-        return response.json()["data"]["stations"]
+        stations_info = response.json()["data"]["stations"]
+        for station_info in stations_info:
+            station_info["station_id"] = int(station_info["station_id"])
+        return stations_info
     except requests.exceptions.HTTPError:
         logger.error("Error fetching stations information from API", exc_info=True)
         raise

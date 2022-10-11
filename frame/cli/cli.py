@@ -1,4 +1,7 @@
+import logging
+
 import typer
+import uvicorn
 
 from frame.cli.stations import cli as stations_cli
 from frame.utils import DEFAULT_PRETTY, DEFAULT_VERBOSE, config_logging
@@ -21,3 +24,26 @@ def main(
     ),
 ):
     config_logging(verbose, pretty)
+
+
+@cli.command()
+def server(
+    host: str = typer.Option("127.0.0.1", help="Host to bind to"),
+    port: int = typer.Option(10101, help="Port to bind to"),
+    reload: bool = typer.Option(False, help="Live reloading"),
+    workers: int = typer.Option(2, min=1, help="Amount of workers to use"),
+):
+    uvicorn_server = uvicorn.Server(
+        uvicorn.Config(
+            "frame.api.app:app",
+            reload=reload,
+            host=host,
+            port=port,
+            workers=workers,
+            log_level=logging.getLevelName(
+                logging.getLogger().getEffectiveLevel()
+            ).lower(),
+        )
+    )
+
+    uvicorn_server.run()
