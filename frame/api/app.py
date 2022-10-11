@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi import Depends, FastAPI, HTTPException
 
+from frame import __version__
 from frame.utils import get_logger
 from frame.models.base import SessionLocal
 from frame.exceptions import StationDoesNotExist
@@ -14,7 +15,10 @@ from frame.api.services import stations as station_service
 
 logger = get_logger(__name__)
 
-app = FastAPI()
+app = FastAPI(
+    title="Frame - BicisBA API",
+    description="Stations, status and predictions for the EcoBici system in Buenos Aires.",
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins="*",
