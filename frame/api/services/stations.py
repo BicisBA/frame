@@ -33,64 +33,51 @@ def update_stations_info(db: Session) -> None:
     columns = Station.__table__.columns.keys()
 
     for station_info in stations_info:
-        try:
-            new_station: Station
-            db_station = (
-                db.query(Station)
-                .filter(Station.station_id == station_info["station_id"])
-                .first()
-            )
-            if db_station is None:
-                new_station = Station(**{col: station_info.get(col) for col in columns})
-            else:
-                new_station = db_station
-                new_station.update_fields(
-                    **{col: station_info.get(col) for col in columns}
-                )
+        new_station: Station
+        db_station = (
+            db.query(Station)
+            .filter(Station.station_id == station_info["station_id"])
+            .first()
+        )
+        if db_station is None:
+            new_station = Station(**{col: station_info.get(col) for col in columns})
+        else:
+            new_station = db_station
+            new_station.update_fields(**{col: station_info.get(col) for col in columns})
 
-            db.merge(new_station)
-            db.commit()
-
-        except KeyError:
-            logger.error(
-                "KeyError, where columns are %s and status is %s", columns, station_info
-            )
-            raise
+        db.merge(new_station)
+    db.commit()
 
 
 def update_stations_status(db: Session) -> None:
     """Update stations status with the latest data from the API."""
     stations_status = fetch_stations_status()
+    stations = set(x.station_id for x in get_stations(db))
 
     columns = StationStatus.__table__.columns.keys()
 
     for station_status in stations_status:
-        try:
-            new_station_status: StationStatus
+        if station_status["station_id"] not in stations:
+            continue
 
-            db_station_status = (
-                db.query(StationStatus)
-                .filter(StationStatus.station_id == station_status["station_id"])
-                .first()
+        new_station_status: StationStatus
+
+        db_station_status = (
+            db.query(StationStatus)
+            .filter(StationStatus.station_id == station_status["station_id"])
+            .first()
+        )
+        if db_station_status is None:
+            new_station_status = StationStatus(
+                **{col: station_status.get(col) for col in columns}
             )
-            if db_station_status is None:
-                new_station_status = StationStatus(
-                    **{col: station_status.get(col) for col in columns}
-                )
-            else:
-                new_station_status = db_station_status
-                new_station_status.update_fields(
-                    **{col: station_status.get(col) for col in columns}
-                )
-            db.merge(new_station_status)
-            db.commit()
-        except KeyError:
-            logger.error(
-                "KeyError, where columns are %s and status is %s",
-                columns,
-                station_status,
+        else:
+            new_station_status = db_station_status
+            new_station_status.update_fields(
+                **{col: station_status.get(col) for col in columns}
             )
-            raise
+        db.merge(new_station_status)
+    db.commit()
 
 
 def get_stations_status(db: Session) -> List[StationStatus]:
