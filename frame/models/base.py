@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from frame.config import cfg
 from frame.utils import get_logger
-from frame.constants import DEFAULT_SQLITE
+from frame.constants import POOL_SIZE, MAX_OVERFLOW, DEFAULT_SQLITE
 
 logger = get_logger(__name__)
 
@@ -20,7 +20,12 @@ def fix_psql_schema(db_conn_url: str) -> str:
 DB_URL = cfg.database.url(default=DEFAULT_SQLITE, cast=fix_psql_schema)
 DB_CONN_ARGS = {"check_same_thread": False} if DB_URL == DEFAULT_SQLITE else {}
 
-engine = create_engine(DB_URL, connect_args=DB_CONN_ARGS)
+engine = create_engine(
+    DB_URL,
+    connect_args=DB_CONN_ARGS,
+    pool_size=cfg.api.pool_size(default=POOL_SIZE, cast=int),
+    max_overflow=cfg.api.max_overflow(default=MAX_OVERFLOW, cast=int),
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

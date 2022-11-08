@@ -15,5 +15,8 @@ class Environments(enum.Enum):
 
 ECOBICI_API = "https://apitransporte.buenosaires.gob.ar/ecobici/gbfs/{endpoint}?client_id={client_id}&client_secret={client_secret}"
 
+POOL_SIZE: int = 50
+MAX_OVERFLOW: int = 200
+
 STATUS_ENDPOINT = "stationStatus"
 STATIONS_ENDPOINT = "stationInformation"
