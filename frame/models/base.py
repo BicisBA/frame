@@ -19,13 +19,16 @@ def fix_psql_schema(db_conn_url: str) -> str:
 
 DB_URL = cfg.database.url(default=DEFAULT_SQLITE, cast=fix_psql_schema)
 DB_CONN_ARGS = {"check_same_thread": False} if DB_URL == DEFAULT_SQLITE else {}
-
-engine = create_engine(
-    DB_URL,
-    connect_args=DB_CONN_ARGS,
-    pool_size=cfg.api.pool_size(default=POOL_SIZE, cast=int),
-    max_overflow=cfg.api.max_overflow(default=MAX_OVERFLOW, cast=int),
+EXTRA_ARGS = (
+    {}
+    if DB_URL == DEFAULT_SQLITE
+    else {
+        "pool_size": cfg.api.pool_size(default=POOL_SIZE, cast=int),
+        "max_overflow": cfg.api.max_overflow(default=MAX_OVERFLOW, cast=int),
+    }
 )
+
+engine = create_engine(DB_URL, connect_args=DB_CONN_ARGS, **EXTRA_ARGS)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
