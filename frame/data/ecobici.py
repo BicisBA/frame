@@ -1,7 +1,9 @@
+import logging
 from functools import partial
 from typing import Any, Dict, List, Literal, Optional
 
 import requests
+import tenacity
 from pydantic import BaseModel
 
 from frame.utils import get_logger
@@ -47,6 +49,12 @@ class EcobiciStationInfo(BaseModel):
     station_id: str
 
 
+@tenacity.retry(
+    wait=tenacity.wait_fixed(30),
+    retry=tenacity.retry_if_exception_type(requests.exceptions.HTTPError),
+    stop=tenacity.stop_after_attempt(30),
+    before=tenacity.before_log(logger, logging.INFO),
+)
 def fetch_stations_status() -> List[EcobiciStationStatus]:
     """Fetch stations' status from the EcoBici API."""
     logger.info("Fetching stations status from API")
@@ -63,6 +71,12 @@ def fetch_stations_status() -> List[EcobiciStationStatus]:
         raise
 
 
+@tenacity.retry(
+    wait=tenacity.wait_fixed(30),
+    retry=tenacity.retry_if_exception_type(requests.exceptions.HTTPError),
+    stop=tenacity.stop_after_attempt(30),
+    before=tenacity.before_log(logger, logging.INFO),
+)
 def fetch_stations_info() -> List[EcobiciStationInfo]:
     """Fetch information on all stations from the EcoBici API."""
     logger.info("Fetching stations information from API")

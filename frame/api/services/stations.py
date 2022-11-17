@@ -60,6 +60,17 @@ def update_stations_status(db: Session) -> None:
             logger.info("Skipping %s, since it's marked as EOL", station_status)
             continue
 
+        if (
+            db.query(Station)
+            .filter(Station.station_id == station_status["station_id"])
+            .first()
+            is None
+        ):
+            logger.info(
+                "Skipping %s, since there's no info for such station", station_status
+            )
+            continue
+
         new_station_status: StationStatus
 
         db_station_status = (
