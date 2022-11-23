@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from fastapi import Depends, APIRouter, HTTPException
 
 from frame.utils import get_logger
+from frame.predictors import Predictors
 from frame.api.dependencies import get_db
 from frame.exceptions import StationDoesNotExist
 from frame.api.schemas import stations as station_schemas
@@ -48,8 +49,9 @@ def predict_for_station(
     station_id: int,
     prediction_params: station_schemas.PredictionParams,
     db: Session = Depends(get_db),
+    predictors: Predictors = Depends(Predictors),
 ):
     try:
-        return station_service.predict(station_id, prediction_params, db)
+        return station_service.predict(station_id, prediction_params, db, predictors)
     except StationDoesNotExist:
         raise HTTPException(status_code=404, detail="Station does not exist")

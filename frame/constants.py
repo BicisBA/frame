@@ -20,3 +20,5 @@ MAX_OVERFLOW: int = 200
 
 STATUS_ENDPOINT = "stationStatus"
 STATIONS_ENDPOINT = "stationInformation"
+
+MODEL_RELOAD_SECONDS = 60 * 60 * 24  # Daily reload

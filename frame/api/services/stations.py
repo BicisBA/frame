@@ -1,5 +1,5 @@
 """Logic for stations."""
-import random
+import datetime
 from typing import List
 
 from sqlalchemy.orm import Session
@@ -9,6 +9,11 @@ from frame.api.schemas.stations import PredictionParams
 from frame.models import Station, Prediction, StationStatus
 from frame.exceptions import NoInfoForStation, StationDoesNotExist
 from frame.data.ecobici import fetch_stations_info, fetch_stations_status
+from frame.predictors import (
+    Predictors,
+    ETAPredictionFeatures,
+    AvailabilityPredictionFeatures,
+)
 
 logger = get_logger(__name__)
 
@@ -113,7 +118,10 @@ def get_station_status(station_id: int, db: Session) -> StationStatus:
 
 
 def predict(
-    station_id: int, prediction_params: PredictionParams, db: Session
+    station_id: int,
+    prediction_params: PredictionParams,
+    db: Session,
+    predictors: Predictors,
 ) -> Prediction:
     """Predict availability of bike in a given station at some point in the future.
 
@@ -121,17 +129,27 @@ def predict(
     also the estimated time of arrival of a bike after said point, were the prediction
     that no bikes will be available by then.
     """
+    station_status = get_station_status(station_id, db)
+    current_time = datetime.datetime.now()
+    dow = (current_time.weekday() + 1) % 7  # Fixed alignment Sunday = 0 -> Saturday = 6
 
-    # The following method is locally defined because it should be used only
-    # for the mocked prediction
-    def clip(x, low, high):
-        """Clip x between low and high."""
-        x = max(x, low)
-        x = min(x, high)
-        return x
-
-    bike_availability_probability: float = clip(random.normalvariate(0.5, 0.15), 0, 1)
-    bike_eta: float = clip(random.normalvariate(12, 2), 0, 30)
+    bike_availability_probability: float = predictors.predict_availability(
+        AvailabilityPredictionFeatures(
+            station_id,
+            current_time.hour,
+            dow,
+            station_status,
+            prediction_params.user_eta,
+        ),
+    )
+    bike_eta: float = predictors.predict_eta(
+        ETAPredictionFeatures(
+            station_id,
+            current_time.hour,
+            dow,
+            station_status,
+        )
+    )
 
     new_prediction = Prediction(
         station_id=station_id,

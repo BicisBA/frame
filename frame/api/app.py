@@ -5,7 +5,9 @@ from fastapi.middleware.gzip import GZipMiddleware
 
 from frame import __version__
 from frame.utils import get_logger
+from frame.predictors import Predictors
 from frame.models.base import SessionLocal
+from frame.constants import MODEL_RELOAD_SECONDS
 from frame.api.services import stations as station_service
 from frame.api.namespaces.stations import router as stations_router
 
@@ -34,6 +36,18 @@ def refresh_stations_info() -> None:
     db = SessionLocal()
     station_service.update_stations_info(db)
     db.close()
+
+
+@app.on_event("startup")
+@repeat_every(
+    seconds=MODEL_RELOAD_SECONDS,
+    max_repetitions=1,
+    logger=logger,
+)
+def refresh_models() -> None:
+    logger.info("Reloading models")
+    Predictors().reload_models()
+    logger.info("Models reloaded")
 
 
 @app.on_event("startup")
