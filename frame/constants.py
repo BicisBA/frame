@@ -20,3 +20,17 @@ MAX_OVERFLOW: int = 200
 
 STATUS_ENDPOINT = "stationStatus"
 STATIONS_ENDPOINT = "stationInformation"
+
+
+class MLFlowStage(str, enum.Enum):
+    Staging = "Staging"
+    Production = "Production"
+    Archived = "Archived"
+
+
+class FrameModels(str, enum.Enum):
+    ETA = "eta"
+    AVAILABILITY = "availability"
+
+
+MODELS_QUERIES = {FrameModels.ETA: "eta", FrameModels.AVAILABILITY: "availability"}

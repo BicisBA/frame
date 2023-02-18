@@ -1,146 +1,63 @@
-from io import BytesIO
-import os
-import tempfile
-from typing import List
+from datetime import datetime
+from typing import Tuple, Callable, Iterable, Optional
 
-import duckdb
-import joblib
-import pandas as pd
-import pyarrow.dataset as ds
-from sklearn.compose import ColumnTransformer
-from sklearn.metrics import mean_absolute_error
-from sklearn.model_selection import train_test_split
-from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.utils import shuffle
+from sklearn.metrics import mean_absolute_error
+from sklearn.base import BaseEstimator, RegressorMixin, clone
 
-from models.s3 import S3Client
+from frame.constants import FrameModels
+from frame.train.train import train_model
 
-FEATURES_ORDER = [
-    "hour",
-    "dow",
-    "num_bikes_disabled",
-    "num_docks_available",
-    "num_docks_disabled",
-]
-TARGET = "minutes_bt_check"
-OHE_SLICE = [0, 1]
-SS_SLICE = slice(2, 8)
-TEST_SIZE = 0.1
-
-DATA_BASE_PATH = "silver/status/"
-DATA_DATE_TEMPLATE = "year=%Y/month=%-m/day=%-d"
-
-CURRENT_MODEL_KEY = "models/current_eta_model.txt"
-JOBLIB_COMPRESSION = ("lzma", 3)
-MODELS_BASE_PATH = "models/"
-MODELS_DATE_TEMPLATE = "year=%Y/month=%m/%d"
-MODELS_FILE_NAME = "_eta.joblib"
-METRICS_FILE_NAME = "_eta_metrics.joblib"
+# TODO: move to constants
+ETA_FEATURES: Tuple[str] = ("num_bikes_available",)
+ETA_TARGET: str = "eta"
+ETA_METRICS: Iterable[Callable] = (mean_absolute_error,)
 
 
-class ETAModelTrainer:
+class ETAByStationEstimator(BaseEstimator, RegressorMixin):
     def __init__(
         self,
-        features_order: List[str] = FEATURES_ORDER,
-        target: str = TARGET,
-        ss_slice=SS_SLICE,
-    ) -> None:
-        self.features_order = features_order
-        self.target = target
-        self.ss_slice = ss_slice
-        self.s3_cli = S3Client()
-        self.stations_pipelines = dict()
-        self.stations_metrics = dict()
+        regressor: RegressorMixin,
+        partition_column: str,
+        partition_values: Iterable,
+    ):
+        self.regressor = regressor
+        self.partition_column = partition_column
+        self.partition_values = partition_values
+        self.regressors = {
+            val: clone(self.regressor()) for val in self.partition_column
+        }
 
-    def create_dataset(self, end_date, training_period: int = 100) -> pd.DataFrame:
-        temp_dir = tempfile.TemporaryDirectory()
-        dates = pd.date_range(end=end_date, periods=training_period)
+    def fit(self, X, y):
+        for val, reg in self.regressors.items():
+            mask = X[self.partition_column] == val
+            reg.fit(X[mask], y[mask])
 
-        for day in dates:
-            day_keys = self.s3_cli.client.Bucket(self.s3_cli.bucket).objects.filter(
-                Prefix=DATA_BASE_PATH + day.strftime(DATA_DATE_TEMPLATE)
-            )
-            for parquet_object in day_keys:
-                parquet_temp_path = temp_dir.name + "/" + parquet_object.key
-                os.makedirs(os.path.dirname(parquet_temp_path), exist_ok=True)
-                self.s3_cli.client.Bucket(self.s3_cli.bucket).download_file(
-                    Key=parquet_object.key, Filename=parquet_temp_path
-                )
-
-        # Review this: https://duckdb.org/docs/guides/import/s3_import
-        dataset = ds.dataset(
-            temp_dir.name + "/silver/status", format="parquet", partitioning="hive"
-        )
-        con = duckdb.connect()
-        con = con.register("status", dataset)
-
-        station_ids = (
-            con.execute("select distinct(station_id) from status")
-            .df()["station_id"]
-            .values
-        )
-        dfs_to_concat = []
-
-        for station_id in station_ids:
-            df_query = ""  # BASE_TABLE_QUERY.format(station_id)
-            dfs_to_concat.append(con.execute(df_query).df())
-        dataset_df = pd.concat(dfs_to_concat)
-
-        temp_dir.cleanup()
-        return dataset_df
-
-    def train_all_stations(self, data_set) -> None:
-        for station_id in data_set["station_id"].unique():
-            self.train_station(
-                station_id, data_set[data_set["station_id"] == station_id]
+    def predict(self, X):
+        for val in X[self.partition_column].unique():
+            X.iloc[X.partition_column == val, "pred"] = self.regressors[val].predict(
+                X.iloc[X.partition_column == val]
             )
 
-    def train_station(self, station_id, data_set) -> None:
-        station_pipeline = make_pipeline(
-            ColumnTransformer(
-                [
-                    ("ohe", OneHotEncoder(sparse=False), [0, 1]),
-                    ("ss", StandardScaler(), slice(2, 5)),
-                ]
-            ),
-            MLPRegressor((128, 128, 128)),
-        )
-        data_set = data_set.dropna()
-        X_train, X_test, y_train, y_test = train_test_split(
-            data_set[self.features_order].values,
-            data_set[self.target].values,
-            test_size=TEST_SIZE,
-            shuffle=False,
-        )
-        X_train, y_train = shuffle(X_train, y_train)
-        station_pipeline.fit(X_train, y_train)
-        self.stations_pipelines[station_id] = station_pipeline
-        self.stations_metrics[station_id] = mean_absolute_error(
-            y_test, station_pipeline.predict(X_test)
-        )
+        preds = X["pred"].copy()
+        X.drop(columns=["pred"], inplace=True)
+        return preds
 
-    def dump_stations_pipelines(self, date, current=False) -> None:
-        model_key = (
-            MODELS_BASE_PATH + date.strftime(MODELS_DATE_TEMPLATE) + MODELS_FILE_NAME
-        )
-        metrics_key = (
-            MODELS_BASE_PATH + date.strftime(MODELS_DATE_TEMPLATE) + METRICS_FILE_NAME
-        )
-        with BytesIO() as mem_f:
-            joblib.dump(self.stations_pipelines, mem_f, compress=JOBLIB_COMPRESSION)
-            mem_f.seek(0)
-            self.s3_cli.client.Bucket(self.s3_cli.bucket).upload_fileobj(
-                Key=model_key, Fileobj=mem_f
-            )
-        with BytesIO() as mem_f:
-            joblib.dump(self.stations_metrics, mem_f)
-            mem_f.seek(0)
-            self.s3_cli.client.Bucket(self.s3_cli.bucket).upload_fileobj(
-                Key=metrics_key, Fileobj=mem_f
-            )
-        if current:
-            self.s3_cli.client.Bucket(self.s3_cli.bucket).put_object(
-                Key=CURRENT_MODEL_KEY, Body=model_key, ContentType="text/plain"
-            )
+
+def train_eta(
+    start_date: datetime,
+    end_date: datetime,
+    features: Tuple[str] = ETA_FEATURES,
+    target: str = ETA_TARGET,
+    metrics: Optional[Iterable[Callable]] = ETA_METRICS,
+):
+    estimator = make_pipeline(...)
+    train_model(
+        FrameModels.ETA,
+        estimator,
+        features,
+        target,
+        metrics=metrics,
+        start_date=start_date,
+        end_date=end_date,
+    )

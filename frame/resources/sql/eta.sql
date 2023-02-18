@@ -8,7 +8,7 @@ WITH base_status AS (SELECT
     status,
     make_timestamp(year, month, day, hour, minute, 0.0) as ts,
 FROM
-    status
+    {{ parquet_partitioned_table('status', year=year, month=month, day=day, hour=hour) }}
 WHERE
     station_id = {} and
     status = 'IN_SERVICE'),
