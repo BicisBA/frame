@@ -1,7 +1,9 @@
 from datetime import datetime
-from typing import Tuple, Iterable, Optional
+from typing import Dict, Tuple, Optional
 
 from sklearn.pipeline import make_pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.base import BaseEstimator, RegressorMixin, clone
 
 from frame.config import cfg
@@ -9,9 +11,16 @@ from frame.train.train import train_model
 from frame.constants import METRICS_MAPPING, DEFAULT_TEST_SIZE, FrameMetric, FrameModels
 
 # TODO: move to constants
-ETA_FEATURES: Tuple[str] = ("num_bikes_available",)
-ETA_TARGET: str = "eta"
+ETA_FEATURES: Tuple[str, ...] = (
+    "hour",
+    "dow",
+    "num_bikes_disabled",
+    "num_docks_available",
+    "num_docks_disabled",
+)
+ETA_TARGET: str = "minutes_bt_check"
 ETA_METRICS: Tuple[FrameMetric] = (FrameMetric.MAE,)
+ETA_CLASS_WEIGHT: Dict[int, int] = {0: 1, 1: 500}
 
 
 class ETAByStationEstimator(BaseEstimator, RegressorMixin):
@@ -19,11 +28,9 @@ class ETAByStationEstimator(BaseEstimator, RegressorMixin):
         self,
         regressor: RegressorMixin,
         partition_column: str,
-        partition_values: Iterable,
     ):
         self.regressor = regressor
         self.partition_column = partition_column
-        self.partition_values = partition_values
         self.regressors = {
             val: clone(self.regressor()) for val in self.partition_column
         }
@@ -47,13 +54,23 @@ class ETAByStationEstimator(BaseEstimator, RegressorMixin):
 def train_eta(
     start_date: datetime,
     end_date: datetime,
-    features: Tuple[str] = ETA_FEATURES,
+    features: Tuple[str, ...] = ETA_FEATURES,
     target: str = ETA_TARGET,
     metrics: Optional[Tuple[FrameMetric]] = ETA_METRICS,
     mlflow_tracking_uri: str = cfg.mlflow.uri(),
     test_size: float = DEFAULT_TEST_SIZE,
 ):
-    estimator = make_pipeline(...)
+    estimator = make_pipeline(
+        [
+            ColumnTransformer(...),
+            ETAByStationEstimator(
+                RandomForestClassifier(
+                    n_estimators=20, max_depth=50, class_weight=ETA_CLASS_WEIGHT
+                ),
+                "station_id",
+            ),
+        ]
+    )
     train_model(
         FrameModels.ETA,
         estimator,
