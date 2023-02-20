@@ -13,6 +13,7 @@ from sklearn.model_selection import train_test_split
 from frame.config import cfg
 from frame.utils import get_logger
 from frame.data.datalake import connect
+from frame import __version__ as frame_version
 from frame.jinja import load_sql_query, render_sql_query
 from frame.constants import MODELS_QUERIES, DEFAULT_TEST_SIZE, FrameModels, MLFlowStage
 
@@ -48,6 +49,8 @@ def train_model(
     mlflow.set_tracking_uri(mlflow_tracking_uri)
     mlflow.set_experiment(experiment_name)
     with mlflow.start_run(run_name=run_name) as run:
+        mlflow.log_param("frame_version", frame_version)
+        mlflow.log_param("features", features)
 
         X_train, X_test, y_train, y_test = train_test_split(
             dataset[features], dataset[target], test_size=test_size, shuffle=True
