@@ -1,4 +1,5 @@
-WITH base_status AS (SELECT
+WITH base_status AS (
+SELECT
     station_id,
     hour,
     num_bikes_available,
@@ -6,15 +7,19 @@ WITH base_status AS (SELECT
     num_docks_available,
     num_docks_disabled,
     status,
-    make_timestamp(year, month, day, hour, minute, 0.0) as ts,
+    make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0) as ts,
 FROM
-    {{ parquet_partitioned_table('status', year=year, month=month, day=day, hour=hour) }}
+    {{ parquet_partitioned_table('status') }}
 WHERE
-    station_id = {} and
-    status = 'IN_SERVICE'),
+	status = 'IN_SERVICE'
+	{% if station_id is defined and station_id is not none %}
+	    AND station_id = {{station_id}}
+	{% endif %}
+	AND {{ filter_daterange(start_date, end_date) }}
+),
 status_by_minute AS (
 	{% for i in range(1, 16) %}
-		{% if not loop.last %}
+		{% if not loop.first %}
 	UNION
 		{% endif %}
 	SELECT
@@ -25,10 +30,10 @@ status_by_minute AS (
     	num_bikes_disabled,
     	num_docks_available,
     	num_docks_disabled,
-    	minute(lead(ts, {i}) over (
+    	minute(lead(ts, {{i}}) over (
     	    order by ts asc
     	) - ts)  as minutes_bt_check,
-    	lead(num_bikes_available, {i}) over (
+    	lead(num_bikes_available, {{i}}) over (
     	    order by ts asc
     	) as bikes_available,
 	FROM

@@ -1,17 +1,17 @@
 from datetime import datetime
-from typing import Tuple, Callable, Iterable, Optional
+from typing import Tuple, Iterable, Optional
 
 from sklearn.pipeline import make_pipeline
-from sklearn.metrics import mean_absolute_error
 from sklearn.base import BaseEstimator, RegressorMixin, clone
 
-from frame.constants import FrameModels
+from frame.config import cfg
 from frame.train.train import train_model
+from frame.constants import METRICS_MAPPING, DEFAULT_TEST_SIZE, FrameMetric, FrameModels
 
 # TODO: move to constants
 ETA_FEATURES: Tuple[str] = ("num_bikes_available",)
 ETA_TARGET: str = "eta"
-ETA_METRICS: Iterable[Callable] = (mean_absolute_error,)
+ETA_METRICS: Tuple[FrameMetric] = (FrameMetric.MAE,)
 
 
 class ETAByStationEstimator(BaseEstimator, RegressorMixin):
@@ -49,7 +49,9 @@ def train_eta(
     end_date: datetime,
     features: Tuple[str] = ETA_FEATURES,
     target: str = ETA_TARGET,
-    metrics: Optional[Iterable[Callable]] = ETA_METRICS,
+    metrics: Optional[Tuple[FrameMetric]] = ETA_METRICS,
+    mlflow_tracking_uri: str = cfg.mlflow.uri(),
+    test_size: float = DEFAULT_TEST_SIZE,
 ):
     estimator = make_pipeline(...)
     train_model(
@@ -57,7 +59,9 @@ def train_eta(
         estimator,
         features,
         target,
-        metrics=metrics,
+        metrics=(METRICS_MAPPING[m] for m in metrics) if metrics is not None else None,
         start_date=start_date,
         end_date=end_date,
+        mlflow_tracking_uri=mlflow_tracking_uri,
+        test_size=test_size,
     )

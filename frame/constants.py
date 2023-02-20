@@ -2,6 +2,13 @@
 
 import enum
 import pathlib
+from typing import Dict, Callable
+
+from sklearn.metrics import (
+    mean_squared_error,
+    mean_absolute_error,
+    mean_absolute_percentage_error,
+)
 
 DEFAULT_SQLITE_LOC = pathlib.Path(__name__).parent.parent / "frame.db"
 DEFAULT_SQLITE = f"sqlite:////{DEFAULT_SQLITE_LOC.resolve()}"
@@ -34,3 +41,18 @@ class FrameModels(str, enum.Enum):
 
 
 MODELS_QUERIES = {FrameModels.ETA: "eta", FrameModels.AVAILABILITY: "availability"}
+
+
+class FrameMetric(str, enum.Enum):
+    MAPE = "MAPE"
+    MAE = "MAE"
+    MSE = "MSE"
+
+
+METRICS_MAPPING: Dict[FrameMetric, Callable] = {
+    FrameMetric.MAE: mean_absolute_error,
+    FrameMetric.MSE: mean_squared_error,
+    FrameMetric.MAPE: mean_absolute_percentage_error,
+}
+
+DEFAULT_TEST_SIZE: float = 0.1

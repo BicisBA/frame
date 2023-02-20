@@ -1,5 +1,6 @@
 """Jinja helpers."""
-from typing import List, Optional
+from datetime import date, datetime
+from typing import List, Union, Optional
 
 import jinja2
 import sqlparse
@@ -31,6 +32,21 @@ def parquet_partitioned_table(
     day_str: str = f"/day={day if day is not None else '*'}"
     hour_str: str = f"/hour={hour if hour is not None else '*'}"
     return f"parquet_scan('s3://{bucket}/{level}/{table}{year_str}{month_str}{day_str}{hour_str}/*.parquet', HIVE_PARTITIONING=1)"
+
+
+def _make_timestamp(element: Union[date, datetime]):
+    hour_part = f"{element.hour}" if isinstance(element, datetime) else "0"
+    date_filter = f"make_timestamp({element.year}, {element.month}, {element.day}, {hour_part}, 0, 0.0)"
+    return date_filter
+
+
+def filter_daterange(
+    start_date: Union[date, datetime], end_date: Union[date, datetime]
+) -> str:
+    """Create a sql statement to filter dates based on individual columns."""
+    return f"""make_timestamp(year::int, month::int, day::int, hour::int, 0, 0.0)
+between {_make_timestamp(start_date)}
+and {_make_timestamp(end_date)} - INTERVAL 1 SECOND"""
 
 
 def load_sql_query(filename: str) -> str:
@@ -78,6 +94,7 @@ def render_sql_query(sql: str, **query_context_params) -> str:
     env.globals.update(
         dict(
             parquet_partitioned_table=parquet_partitioned_table,
+            filter_daterange=filter_daterange,
         )
     )
 

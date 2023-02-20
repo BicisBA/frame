@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import Tuple, Union, Callable, Iterable, Optional
+from typing import Tuple, Union, Callable, Optional
 
 import duckdb
 import joblib
@@ -14,7 +14,7 @@ from frame.config import cfg
 from frame.utils import get_logger
 from frame.data.datalake import connect
 from frame.jinja import load_sql_query, render_sql_query
-from frame.constants import MODELS_QUERIES, FrameModels, MLFlowStage
+from frame.constants import MODELS_QUERIES, DEFAULT_TEST_SIZE, FrameModels, MLFlowStage
 
 logger = get_logger(__name__)
 
@@ -26,8 +26,8 @@ def train_model(
     target: str,
     mlflow_tracking_uri=cfg.mlflow.uri(),
     con: Optional[duckdb.DuckDBPyConnection] = None,
-    test_size: float = 0.3,
-    metrics: Optional[Iterable[Callable]] = None,
+    test_size: float = DEFAULT_TEST_SIZE,
+    metrics: Optional[Tuple[Callable]] = None,
     query: Optional[str] = None,
     **query_kws,
 ):
