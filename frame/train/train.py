@@ -1,4 +1,5 @@
 import os
+import time
 from datetime import datetime
 from typing import Tuple, Union, Callable, Optional
 
@@ -39,7 +40,10 @@ def train_model(
         rendered_query = render_sql_query(sql, **query_kws)
 
     logger.info("Executing query")
+    t0 = time.time()
     dataset = con.execute(rendered_query).df()
+    t1 = time.time()
+    logger.info("Query finished in %.4f", t1 - t0)
 
     mlflow_client = MlflowClient(mlflow_tracking_uri)
 
