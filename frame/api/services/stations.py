@@ -137,7 +137,7 @@ def predict(
     try:
         bike_eta = eta_predictor.predict(
             station_id=station_id,
-            hour=current_time.hour,
+            hod=current_time.hour,
             # Sunday = 0 -> Saturday = 6
             dow=(current_time.weekday() + 1) % 7,
             num_bikes_disabled=station_status.num_bikes_disabled,

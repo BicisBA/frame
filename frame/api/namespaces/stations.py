@@ -6,8 +6,8 @@ from fastapi import Depends, APIRouter, HTTPException
 from frame.utils import get_logger
 from frame.api.schemas import stations as station_schemas
 from frame.api.services import stations as station_service
-from frame.exceptions import PredictionError, StationDoesNotExist
 from frame.api.dependencies import ETAPredictor, MLFlowPredictor, get_db
+from frame.exceptions import PredictionError, NoInfoForStation, StationDoesNotExist
 
 logger = get_logger(__name__)
 
@@ -56,5 +56,10 @@ def predict_for_station(
         )
     except StationDoesNotExist:
         raise HTTPException(status_code=404, detail="Station does not exist")
+    except NoInfoForStation:
+        raise HTTPException(
+            status_code=404,
+            detail="There is no information for this station. Probably does not exist.",
+        )
     except PredictionError:
         raise HTTPException(status_code=503, detail="Predictor uninitialized")
