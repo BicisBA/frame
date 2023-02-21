@@ -56,3 +56,5 @@ METRICS_MAPPING: Dict[FrameMetric, Callable] = {
 }
 
 DEFAULT_TEST_SIZE: float = 0.1
+
+FALLBACK_KEY: str = "fallback"

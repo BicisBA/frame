@@ -23,7 +23,8 @@ logger = get_logger(__name__)
 def train_model(
     model: FrameModels,
     estimator: Union[Pipeline, BaseEstimator],
-    features: Tuple[str],
+    num_features: Tuple[str, ...],
+    cat_features: Tuple[str, ...],
     target: str,
     mlflow_tracking_uri=cfg.mlflow.uri(),
     con: Optional[duckdb.DuckDBPyConnection] = None,
@@ -37,6 +38,7 @@ def train_model(
         sql = load_sql_query(MODELS_QUERIES[model])
         rendered_query = render_sql_query(sql, **query_kws)
 
+    logger.info("Executing query")
     dataset = con.execute(rendered_query).df()
 
     mlflow_client = MlflowClient(mlflow_tracking_uri)
@@ -50,12 +52,17 @@ def train_model(
     mlflow.set_experiment(experiment_name)
     with mlflow.start_run(run_name=run_name) as run:
         mlflow.log_param("frame_version", frame_version)
-        mlflow.log_param("features", features)
+        mlflow.log_param("num_features", num_features)
+        mlflow.log_param("cat_features", cat_features)
 
         X_train, X_test, y_train, y_test = train_test_split(
-            dataset[features], dataset[target], test_size=test_size, shuffle=True
+            dataset.drop(columns=[target]),
+            dataset[target],
+            test_size=test_size,
+            shuffle=True,
         )
 
+        logger.info("Fitting estimator")
         estimator.fit(X_train, y_train)
 
         if metrics is not None:
@@ -69,6 +76,7 @@ def train_model(
 
         estimator_path = f"{model}.joblib"
 
+        logger.info("Dumping estimator")
         joblib.dump(estimator_path, estimator)
         mlflow.log_artifact(estimator_path)
         new_version = mlflow_client.create_model_version(

@@ -3669,14 +3669,14 @@ files = [
 
 [[package]]
 name = "youconfigme"
-version = "0.9.0"
+version = "0.9.1"
 description = "YouConfigMe helps you manage config in a pythonic way"
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "youconfigme-0.9.0-py3-none-any.whl", hash = "sha256:36e3a9c0c0c1fed871e770e705893cc22a00e5057128fb978ac86332e5ccba98"},
-    {file = "youconfigme-0.9.0.tar.gz", hash = "sha256:70242ab149d3aff30dd180fb4c28eef948731c799b1fac8385134162af16166d"},
+    {file = "youconfigme-0.9.1-py3-none-any.whl", hash = "sha256:a3bdaa061e138d161961f16dd92a54350d2d30ff5d52467d4186450b8090617f"},
+    {file = "youconfigme-0.9.1.tar.gz", hash = "sha256:d5715a9c0bf7e19b586ba1ebdc6faa595ed7cf428811e59df6ff744387ca8d8c"},
 ]
 
 [package.dependencies]
