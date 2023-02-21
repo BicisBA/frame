@@ -43,7 +43,7 @@ def train_model(
     t0 = time.time()
     dataset = con.execute(rendered_query).df()
     t1 = time.time()
-    logger.info("Query finished in %.4f", t1 - t0)
+    logger.info("Query finished in %.4f s", t1 - t0)
 
     mlflow_client = MlflowClient(mlflow_tracking_uri)
 
@@ -81,7 +81,7 @@ def train_model(
         estimator_path = f"{model}.joblib"
 
         logger.info("Dumping estimator")
-        joblib.dump(estimator_path, estimator)
+        joblib.dump(estimator, estimator_path)
         mlflow.log_artifact(estimator_path)
         new_version = mlflow_client.create_model_version(
             experiment_name, estimator_path, run.info.run_id
