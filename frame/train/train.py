@@ -1,5 +1,6 @@
 import os
 import time
+import operator as ops
 from datetime import datetime
 from typing import Tuple, Union, Callable, Optional
 
@@ -12,8 +13,8 @@ from mlflow.tracking import MlflowClient
 from sklearn.model_selection import train_test_split
 
 from frame.config import cfg
-from frame.utils import get_logger
 from frame.data.datalake import connect
+from frame.utils import with_env, get_logger
 from frame import __version__ as frame_version
 from frame.jinja import load_sql_query, render_sql_query
 from frame.constants import MODELS_QUERIES, DEFAULT_TEST_SIZE, FrameModels, MLFlowStage
@@ -21,6 +22,11 @@ from frame.constants import MODELS_QUERIES, DEFAULT_TEST_SIZE, FrameModels, MLFl
 logger = get_logger(__name__)
 
 
+@with_env(
+    MLFLOW_TRACKING_USERNAME=cfg.mlflow.username(),
+    MLFLOW_TRACKING_PASSWORD=cfg.mlflow.password(),
+    MLFLOW_TRACKING_SERVER_CERT_PATH=cfg.mlflow.cert_path(),
+)
 def train_model(
     model: FrameModels,
     estimator: Union[Pipeline, BaseEstimator],
@@ -51,6 +57,18 @@ def train_model(
 
     experiment_name = f"prod_{model}"
     run_name = f"{experiment_name}_{run_date}"
+
+    try:
+        logger.info("Trying to fetch latest version for model %s", model)
+        versions = mlflow_client.get_latest_versions(model)
+        if versions:
+            latest = max(versions, ops.attrgetter("creation_timestamp"))
+            logger.info("Latest version for model %s was %s", model, latest)
+    except mlflow.exceptions.RestException:
+        logger.info(
+            "No previous versions found for model %s. Registering first version.", model
+        )
+        mlflow_client.create_registered_model(model)
 
     mlflow.set_tracking_uri(mlflow_tracking_uri)
     mlflow.set_experiment(experiment_name)
