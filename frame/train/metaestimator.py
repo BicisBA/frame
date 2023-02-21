@@ -21,10 +21,11 @@ class PartitionedMetaEstimator(BaseEstimator, RegressorMixin):
         self.regressors: Dict[Union[int, str], BaseEstimator] = {}
 
     def fit(self, X, y):
-        logger.info("Fit fallback")
+        logger.info("Fit fallback estimators")
         self.regressors[FALLBACK_KEY] = clone(self.regressor)
         self.regressors[FALLBACK_KEY].fit(X, y)
 
+        logger.info("Fit stations estimators")
         for val in tqdm(X[self.partition_column].unique(), desc="Fitting"):
             mask = X[self.partition_column] == val
 
