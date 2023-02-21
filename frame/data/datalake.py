@@ -10,8 +10,8 @@ def connect(
     s3_region: str = None,
     s3_access_key_id: str = None,
     s3_secret_access_key: str = None,
-    memory_limit: Optional[int] = 4,
-    threads: Optional[int] = 4,
+    memory_limit: Optional[int] = 2,
+    threads: Optional[int] = 2,
     progress_bar: bool = True,
 ):
     cursor = duckdb.connect()

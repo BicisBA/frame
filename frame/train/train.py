@@ -1,7 +1,7 @@
 import os
 import time
 import operator as ops
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Tuple, Union, Callable, Optional
 
 import duckdb
@@ -49,7 +49,7 @@ def train_model(
     t0 = time.time()
     dataset = con.execute(rendered_query).df()
     t1 = time.time()
-    logger.info("Query finished in %.4f s", t1 - t0)
+    logger.info("Query finished in %s", timedelta(seconds=t1 - t0))
 
     mlflow_client = MlflowClient(mlflow_tracking_uri)
 
@@ -62,7 +62,7 @@ def train_model(
         logger.info("Trying to fetch latest version for model %s", model)
         versions = mlflow_client.get_latest_versions(model)
         if versions:
-            latest = max(versions, ops.attrgetter("creation_timestamp"))
+            latest = max(versions, key=ops.attrgetter("creation_timestamp"))
             logger.info("Latest version for model %s was %s", model, latest)
     except mlflow.exceptions.RestException:
         logger.info(
@@ -76,6 +76,7 @@ def train_model(
         mlflow.log_param("frame_version", frame_version)
         mlflow.log_param("num_features", num_features)
         mlflow.log_param("cat_features", cat_features)
+        mlflow.log_param("query_bindings", query_kws)
 
         X_train, X_test, y_train, y_test = train_test_split(
             dataset.drop(columns=[target]),
@@ -87,6 +88,7 @@ def train_model(
         logger.info("Fitting estimator")
         estimator.fit(X_train, y_train)
 
+        logger.info("Logging metrics")
         if metrics is not None:
             for metric in metrics:
                 mlflow.log_metric(
@@ -101,11 +103,12 @@ def train_model(
         logger.info("Dumping estimator")
         joblib.dump(estimator, estimator_path)
         mlflow.log_artifact(estimator_path)
+
         new_version = mlflow_client.create_model_version(
-            experiment_name, estimator_path, run.info.run_id
+            model, estimator_path, run.info.run_id
         )
         mlflow_client.transition_model_version_stage(
-            experiment_name, new_version.version, MLFlowStage.Production.value
+            model, new_version.version, MLFlowStage.Production.value
         )
 
         os.remove(estimator_path)

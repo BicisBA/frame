@@ -46,7 +46,7 @@ class S3Client:
 
             s3_cert = cfg.s3.cert(default=None)
 
-            if s3_cert is not None:
+            if s3_cert is not None and s3_cert != "":
                 logger.info(
                     "Looking for certificate in bucket %s at prefix %s", bucket, s3_cert
                 )
@@ -65,8 +65,10 @@ class S3Client:
             else:
                 cls._boto_client = boto3.resource(
                     "s3",
+                    endpoint_url=endpoint_url,
                     aws_access_key_id=access_key,
                     aws_secret_access_key=secret_key,
+                    verify=False,
                 )
 
         return cls._instance

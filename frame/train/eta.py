@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, Tuple, Optional
+from typing import Tuple, Optional
 
 from sklearn.pipeline import make_pipeline
 from sklearn.compose import ColumnTransformer
@@ -27,7 +27,6 @@ PARTITION_COLUMN: str = "station_id"
 
 ETA_TARGET: str = "minutes_bt_check"
 ETA_METRICS: Tuple[FrameMetric] = (FrameMetric.MAE,)
-ETA_CLASS_WEIGHT: Dict[int, int] = {0: 1, 1: 500}
 
 
 def train_eta(
@@ -45,7 +44,13 @@ def train_eta(
     pipeline = make_pipeline(
         ColumnTransformer(
             [
-                ("ohe", OneHotEncoder(sparse_output=False), [*cat_features]),
+                (
+                    "ohe",
+                    OneHotEncoder(
+                        handle_unknown="infrequent_if_exist", sparse_output=False
+                    ),
+                    [*cat_features],
+                ),
                 (
                     "ss",
                     StandardScaler(),

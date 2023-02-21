@@ -1,14 +1,20 @@
 """Logic for stations."""
-import random
 from typing import List
+from datetime import datetime
 
 from sqlalchemy.orm import Session
 
 from frame.utils import get_logger
+from frame.api.dependencies import MLFlowPredictor
 from frame.api.schemas.stations import PredictionParams
 from frame.models import Station, Prediction, StationStatus
-from frame.exceptions import NoInfoForStation, StationDoesNotExist
 from frame.data.ecobici import fetch_stations_info, fetch_stations_status
+from frame.exceptions import (
+    PredictionError,
+    NoInfoForStation,
+    StationDoesNotExist,
+    UninitializedPredictor,
+)
 
 logger = get_logger(__name__)
 
@@ -113,7 +119,10 @@ def get_station_status(station_id: int, db: Session) -> StationStatus:
 
 
 def predict(
-    station_id: int, prediction_params: PredictionParams, db: Session
+    station_id: int,
+    prediction_params: PredictionParams,
+    db: Session,
+    eta_predictor: MLFlowPredictor,
 ) -> Prediction:
     """Predict availability of bike in a given station at some point in the future.
 
@@ -122,20 +131,28 @@ def predict(
     that no bikes will be available by then.
     """
 
-    # The following method is locally defined because it should be used only
-    # for the mocked prediction
-    def clip(x, low, high):
-        """Clip x between low and high."""
-        x = max(x, low)
-        x = min(x, high)
-        return x
+    current_time = datetime.now()
+    station_status = get_station_status(station_id, db)
 
-    bike_availability_probability: float = clip(random.normalvariate(0.5, 0.15), 0, 1)
-    bike_eta: float = clip(random.normalvariate(12, 2), 0, 30)
+    try:
+        bike_eta = eta_predictor.predict(
+            station_id=station_id,
+            hour=current_time.hour,
+            # Sunday = 0 -> Saturday = 6
+            dow=(current_time.weekday() + 1) % 7,
+            num_bikes_disabled=station_status.num_bikes_disabled,
+            num_docks_available=station_status.num_docks_available,
+            num_docks_disabled=station_status.num_docks_disabled,
+        )
+    except UninitializedPredictor:
+        logger.exception("Error predicting ETA")
+        raise PredictionError("Uninitialized ETA predictor")
+
+    availability_probability = 0.7
 
     new_prediction = Prediction(
         station_id=station_id,
-        bike_availability_probability=bike_availability_probability,
+        bike_availability_probability=availability_probability,
         bike_eta=bike_eta,
         user_eta=prediction_params.user_eta,
         user_lat=prediction_params.user_lat,

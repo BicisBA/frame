@@ -21,7 +21,7 @@ class PartitionedMetaEstimator(BaseEstimator, RegressorMixin):
         self.regressors: Dict[Union[int, str], BaseEstimator] = {}
 
     def fit(self, X, y):
-        logger.info("Fit fallback estimators")
+        logger.info("Fit fallback estimator")
         self.regressors[FALLBACK_KEY] = clone(self.regressor)
         self.regressors[FALLBACK_KEY].fit(X, y)
 
