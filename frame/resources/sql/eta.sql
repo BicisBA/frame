@@ -41,7 +41,7 @@ status_by_minute AS (
 	{% endfor %}
 )
 SELECT station_id,
-    hour,
+	hour::int hod,
     dow,
     num_bikes_disabled,
     num_docks_available,

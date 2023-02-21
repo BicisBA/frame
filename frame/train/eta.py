@@ -21,7 +21,7 @@ ETA_NUM_FEATURES: Tuple[str, ...] = (
     "num_docks_disabled",
 )
 
-ETA_CAT_FEATURES: Tuple[str, ...] = ("hour", "dow")
+ETA_CAT_FEATURES: Tuple[str, ...] = ("hod", "dow")
 
 PARTITION_COLUMN: str = "station_id"
 
