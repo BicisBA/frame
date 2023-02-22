@@ -93,8 +93,8 @@ def render_sql_query(sql: str, **query_context_params) -> str:
     env.filters["wrap"] = wrap
     env.globals.update(
         {
-            parquet_partitioned_table: parquet_partitioned_table,
-            filter_daterange: filter_daterange,
+            "parquet_partitioned_table": parquet_partitioned_table,
+            "filter_daterange": filter_daterange,
         }
     )
 
