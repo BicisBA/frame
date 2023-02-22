@@ -32,6 +32,7 @@ class MLFlowPredictor:
         self.model = model
         self.tracking_uri = tracking_uri
         self.pipeline: Optional[Pipeline] = None
+        self.model_version: Optional[int] = None
         self.initialized = False
 
     @with_env(
@@ -39,7 +40,7 @@ class MLFlowPredictor:
         MLFLOW_TRACKING_PASSWORD=cfg.mlflow.password(),
         MLFLOW_TRACKING_SERVER_CERT_PATH=cfg.mlflow.cert_path(),
     )
-    def reload(self, stage: MLFlowStage = MLFlowStage.Production):
+    def reload(self, stage: MLFlowStage = MLFlowStage.Production) -> None:
         try:
             mlflow.set_tracking_uri(self.tracking_uri)
             client = MlflowClient(self.tracking_uri)
@@ -54,6 +55,10 @@ class MLFlowPredictor:
             latest: mlflow.entities.model_registry.ModelVersion = max(
                 versions, key=ops.attrgetter("creation_timestamp")
             )
+
+            if self.model_version is not None and self.model_version == latest:
+                logger.info("Already at latest model for %s", self.model)
+                return
 
             latest_path = mlflow.artifacts.download_artifacts(
                 artifact_path=f"{self.model}.joblib", run_id=latest.run_id
