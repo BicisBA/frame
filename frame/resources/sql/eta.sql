@@ -51,4 +51,4 @@ FROM status_by_minute
 WHERE (num_bikes_available = 0
 AND bikes_available > 0)
 OR (bikes_available > num_bikes_available
-AND num_bikes_available <= 3)
+AND num_bikes_available <= 2)

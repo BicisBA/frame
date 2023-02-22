@@ -47,7 +47,7 @@ def train_model(
 
     logger.info("Executing query")
     t0 = time.time()
-    dataset = con.execute(rendered_query).df()
+    dataset = con.execute(rendered_query).df().dropna()
     t1 = time.time()
     logger.info("Query finished in %s", timedelta(seconds=t1 - t0))
     logger.info("Total dataset size %s", len(dataset))

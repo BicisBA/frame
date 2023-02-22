@@ -48,14 +48,21 @@ class FrameMetric(str, enum.Enum):
     MAPE = "MAPE"
     MAE = "MAE"
     MSE = "MSE"
-    CM = "CM"
+    FP = "FP"
+
+
+def false_positives(y_test, y_pred):
+    _, fp, _, _ = confusion_matrix(
+        y_test, y_pred, labels=[1, 0], normalize="true"
+    ).ravel()
+    return fp
 
 
 METRICS_MAPPING: Dict[FrameMetric, Callable] = {
     FrameMetric.MAE: mean_absolute_error,
     FrameMetric.MSE: mean_squared_error,
     FrameMetric.MAPE: mean_absolute_percentage_error,
-    FrameMetric.CM: confusion_matrix,
+    FrameMetric.FP: false_positives,
 }
 
 DEFAULT_TEST_SIZE: float = 0.1

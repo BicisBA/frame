@@ -28,7 +28,7 @@ AVAILABILITY_CAT_FEATURES: Tuple[str, ...] = ("hod", "dow")
 AVAILABILITY_PARTITION_COLUMN: str = "station_id"
 
 AVAILABILITY_TARGET: str = "bikes_available"
-AVAILABILITY_METRICS: Tuple[FrameMetric] = (FrameMetric.CM,)
+AVAILABILITY_METRICS: Tuple[FrameMetric] = (FrameMetric.FP,)
 
 CLASS_WEIGHT = {0: 1, 1: 500}
 

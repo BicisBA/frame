@@ -23,7 +23,7 @@ UNION
     {% endif %}
 SELECT
     station_id,
-    hour,
+    hour::int hod,
     dayofweek(ts) as dow,
     num_bikes_available,
     num_bikes_disabled,
