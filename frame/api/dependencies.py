@@ -76,7 +76,6 @@ class MLFlowPredictor:
         if not self.initialized:
             raise UninitializedPredictor("Predictor has not been initialized")
         X = pd.DataFrame(kwargs, index=[0])
-        logger.info("X=%s", X)
         return self.pipeline.predict(X)
 
 
