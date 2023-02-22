@@ -5,6 +5,7 @@ import pathlib
 from typing import Dict, Callable
 
 from sklearn.metrics import (
+    confusion_matrix,
     mean_squared_error,
     mean_absolute_error,
     mean_absolute_percentage_error,
@@ -47,12 +48,14 @@ class FrameMetric(str, enum.Enum):
     MAPE = "MAPE"
     MAE = "MAE"
     MSE = "MSE"
+    CM = "CM"
 
 
 METRICS_MAPPING: Dict[FrameMetric, Callable] = {
     FrameMetric.MAE: mean_absolute_error,
     FrameMetric.MSE: mean_squared_error,
     FrameMetric.MAPE: mean_absolute_percentage_error,
+    FrameMetric.CM: confusion_matrix,
 }
 
 DEFAULT_TEST_SIZE: float = 0.1

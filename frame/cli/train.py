@@ -14,6 +14,14 @@ from frame.train.eta import (
     PARTITION_COLUMN,
     train_eta,
 )
+from frame.train.availability import (
+    AVAILABILITY_TARGET,
+    AVAILABILITY_METRICS,
+    AVAILABILITY_CAT_FEATURES,
+    AVAILABILITY_NUM_FEATURES,
+    AVAILABILITY_PARTITION_COLUMN,
+    train_availability,
+)
 
 logger = get_logger(__name__)
 
@@ -45,7 +53,26 @@ def eta(
     )
 
 
-# TODO
 @cli.command()
-def availability():
-    pass
+def availability(
+    start_date: datetime = typer.Argument(..., formats=["%Y-%m-%d", "%Y-%m-%m %H"]),
+    end_date: datetime = typer.Argument(..., formats=["%Y-%m-%d", "%Y-%m-%m %H"]),
+    num_features: List[str] = AVAILABILITY_NUM_FEATURES,
+    cat_features: List[str] = AVAILABILITY_CAT_FEATURES,
+    target: str = AVAILABILITY_TARGET,
+    metrics: Tuple[FrameMetric] = AVAILABILITY_METRICS,
+    mlflow_tracking_uri: str = cfg.mlflow.uri(),
+    test_size: float = typer.Option(DEFAULT_TEST_SIZE, min=0.0, max=1.0),
+    partition_column: str = AVAILABILITY_PARTITION_COLUMN,
+):
+    train_availability(
+        start_date=start_date,
+        end_date=end_date,
+        num_features=num_features,
+        cat_features=cat_features,
+        target=target,
+        metrics=metrics,
+        mlflow_tracking_uri=mlflow_tracking_uri,
+        test_size=test_size,
+        partition_column=partition_column,
+    )

@@ -50,6 +50,7 @@ def train_model(
     dataset = con.execute(rendered_query).df()
     t1 = time.time()
     logger.info("Query finished in %s", timedelta(seconds=t1 - t0))
+    logger.info("Total dataset size %s", len(dataset))
 
     mlflow_client = MlflowClient(mlflow_tracking_uri)
 
@@ -82,7 +83,7 @@ def train_model(
             dataset.drop(columns=[target]),
             dataset[target],
             test_size=test_size,
-            shuffle=True,
+            shuffle=False,
         )
 
         logger.info("Fitting estimator")

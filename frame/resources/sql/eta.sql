@@ -48,5 +48,7 @@ SELECT station_id,
     num_docks_disabled,
     minutes_bt_check
 FROM status_by_minute
-WHERE num_bikes_available = 0
-AND bikes_available > 0
+WHERE (num_bikes_available = 0
+AND bikes_available > 0)
+OR (bikes_available > num_bikes_available
+AND num_bikes_available <= 3)
