@@ -57,5 +57,6 @@ def refresh_models() -> None:
     logger.info("Reloading models")
     logger.info("Reloading ETA model")
     ETAPredictor.reload()
+    logger.info("Reloading availability model")
     AvailabilityPredictor.reload()
     logger.info("Models reloaded")
