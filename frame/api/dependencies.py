@@ -80,3 +80,4 @@ class MLFlowPredictor:
 
 
 ETAPredictor = MLFlowPredictor(FrameModels.ETA)
+AvailabilityPredictor = MLFlowPredictor(FrameModels.AVAILABILITY)

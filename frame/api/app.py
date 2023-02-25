@@ -6,10 +6,10 @@ from fastapi.middleware.gzip import GZipMiddleware
 from frame import __version__
 from frame.utils import get_logger
 from frame.models.base import SessionLocal
-from frame.api.dependencies import ETAPredictor
 from frame.constants import MODEL_RELOAD_SECONDS
 from frame.api.services import stations as station_service
 from frame.api.namespaces.stations import router as stations_router
+from frame.api.dependencies import ETAPredictor, AvailabilityPredictor
 
 logger = get_logger(__name__)
 
@@ -57,4 +57,5 @@ def refresh_models() -> None:
     logger.info("Reloading models")
     logger.info("Reloading ETA model")
     ETAPredictor.reload()
+    AvailabilityPredictor.reload()
     logger.info("Models reloaded")
