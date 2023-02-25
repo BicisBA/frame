@@ -158,6 +158,7 @@ def predict(
             num_bikes_disabled=station_status.num_bikes_disabled,
             num_docks_available=station_status.num_docks_available,
             num_docks_disabled=station_status.num_docks_disabled,
+            minutes_bt_check=prediction_params.user_eta,
         )
     except UninitializedPredictor:
         logger.exception("Error predicting availability")
