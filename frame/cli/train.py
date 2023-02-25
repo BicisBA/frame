@@ -1,5 +1,5 @@
+from typing import List
 from datetime import datetime
-from typing import List, Tuple
 
 import typer
 
@@ -36,7 +36,7 @@ def eta(
     num_features: List[str] = ETA_NUM_FEATURES,
     cat_features: List[str] = ETA_CAT_FEATURES,
     target: str = ETA_TARGET,
-    metrics: Tuple[FrameMetric] = ETA_METRICS,
+    metrics: List[FrameMetric] = ETA_METRICS,
     mlflow_tracking_uri: str = cfg.mlflow.uri(),
     test_size: float = typer.Option(DEFAULT_TEST_SIZE, min=0.0, max=1.0),
     partition_column: str = PARTITION_COLUMN,
@@ -61,7 +61,7 @@ def availability(
     num_features: List[str] = AVAILABILITY_NUM_FEATURES,
     cat_features: List[str] = AVAILABILITY_CAT_FEATURES,
     target: str = AVAILABILITY_TARGET,
-    metrics: Tuple[FrameMetric] = AVAILABILITY_METRICS,
+    metrics: List[FrameMetric] = AVAILABILITY_METRICS,
     mlflow_tracking_uri: str = cfg.mlflow.uri(),
     test_size: float = typer.Option(DEFAULT_TEST_SIZE, min=0.0, max=1.0),
     partition_column: str = AVAILABILITY_PARTITION_COLUMN,
