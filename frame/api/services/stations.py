@@ -123,6 +123,7 @@ def predict(
     prediction_params: PredictionParams,
     db: Session,
     eta_predictor: MLFlowPredictor,
+    availability_predictor: MLFlowPredictor,
 ) -> Prediction:
     """Predict availability of bike in a given station at some point in the future.
 
@@ -148,7 +149,19 @@ def predict(
         logger.exception("Error predicting ETA")
         raise PredictionError("Uninitialized ETA predictor")
 
-    availability_probability = 0.7
+    try:
+        availability_probability = availability_predictor.predict(
+            station_id=station_id,
+            hod=current_time.hour,
+            dow=(current_time.weekday() + 1) % 7,
+            num_bikes_available=station_status.num_bikes_available,
+            num_bikes_disabled=station_status.num_bikes_disabled,
+            num_docks_available=station_status.num_docks_available,
+            num_docks_disabled=station_status.num_docks_disabled,
+        )
+    except UninitializedPredictor:
+        logger.exception("Error predicting availability")
+        raise PredictionError("Uninitialized availability predictor")
 
     new_prediction = Prediction(
         station_id=station_id,

@@ -10,9 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Python version constrained below 3.11
 
 ### Added
-- Model training into MLFlow
+- ETA model training
+- Availability model training
 - Loading models from MLFlow in API
 - Reading dataset from MinIO through DuckDB
+
+### Fixed
+- Stations were refreshed only once
 
 ## [0.6.0] - 2022-11-17
 ### Added
