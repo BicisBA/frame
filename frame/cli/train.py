@@ -15,6 +15,7 @@ from frame.train.eta import (
     train_eta,
 )
 from frame.train.availability import (
+    POS_WEIGHT as AVAILABILITY_POS_WEIGHT,
     AVAILABILITY_TARGET,
     AVAILABILITY_METRICS,
     AVAILABILITY_CAT_FEATURES,
@@ -64,6 +65,7 @@ def availability(
     mlflow_tracking_uri: str = cfg.mlflow.uri(),
     test_size: float = typer.Option(DEFAULT_TEST_SIZE, min=0.0, max=1.0),
     partition_column: str = AVAILABILITY_PARTITION_COLUMN,
+    pos_weight: int = AVAILABILITY_POS_WEIGHT,
 ):
     train_availability(
         start_date=start_date,
@@ -75,4 +77,5 @@ def availability(
         mlflow_tracking_uri=mlflow_tracking_uri,
         test_size=test_size,
         partition_column=partition_column,
+        pos_weight=pos_weight,
     )

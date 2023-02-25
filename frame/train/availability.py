@@ -30,7 +30,7 @@ AVAILABILITY_PARTITION_COLUMN: str = "station_id"
 AVAILABILITY_TARGET: str = "bikes_available"
 AVAILABILITY_METRICS: Tuple[FrameMetric] = (FrameMetric.FP,)
 
-CLASS_WEIGHT = {0: 1, 1: 500}
+POS_WEIGHT: int = 500
 
 
 def train_availability(
@@ -43,6 +43,7 @@ def train_availability(
     mlflow_tracking_uri: str = cfg.mlflow.uri(),
     test_size: float = DEFAULT_TEST_SIZE,
     partition_column: str = AVAILABILITY_PARTITION_COLUMN,
+    pos_weight: Optional[int] = POS_WEIGHT,
 ):
 
     pipeline = make_pipeline(
@@ -66,7 +67,7 @@ def train_availability(
         ),
         PartitionedMetaEstimator(
             RandomForestClassifier(
-                n_estimators=20, max_depth=50, class_weight=CLASS_WEIGHT
+                n_estimators=20, max_depth=50, class_weight={0: 1, 1: pos_weight or 1}
             ),
             partition_column,
         ),
