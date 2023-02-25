@@ -13,7 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ETA model training
 - Availability model training
 - Loading models from MLFlow in API
+- Predict with loaded models in API
 - Reading dataset from MinIO through DuckDB
+
+### Removed
+- Mocked predictions in API
 
 ### Fixed
 - Stations were refreshed only once
