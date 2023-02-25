@@ -28,7 +28,7 @@ AVAILABILITY_CAT_FEATURES: Tuple[str, ...] = ("hod", "dow")
 AVAILABILITY_PARTITION_COLUMN: str = "station_id"
 
 AVAILABILITY_TARGET: str = "bikes_available"
-AVAILABILITY_METRICS: Tuple[FrameMetric] = (FrameMetric.FP,)
+AVAILABILITY_METRICS: Tuple[FrameMetric, ...] = (FrameMetric.FP, FrameMetric.CM)
 
 POS_WEIGHT: int = 500
 
@@ -39,7 +39,7 @@ def train_availability(
     num_features: Tuple[str, ...] = AVAILABILITY_NUM_FEATURES,
     cat_features: Tuple[str, ...] = AVAILABILITY_CAT_FEATURES,
     target: str = AVAILABILITY_TARGET,
-    metrics: Optional[Tuple[FrameMetric]] = AVAILABILITY_METRICS,
+    metrics: Optional[Tuple[FrameMetric, ...]] = AVAILABILITY_METRICS,
     mlflow_tracking_uri: str = cfg.mlflow.uri(),
     test_size: float = DEFAULT_TEST_SIZE,
     partition_column: str = AVAILABILITY_PARTITION_COLUMN,

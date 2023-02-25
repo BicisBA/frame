@@ -26,7 +26,7 @@ ETA_CAT_FEATURES: Tuple[str, ...] = ("hod", "dow")
 PARTITION_COLUMN: str = "station_id"
 
 ETA_TARGET: str = "minutes_bt_check"
-ETA_METRICS: Tuple[FrameMetric] = (FrameMetric.MAE,)
+ETA_METRICS: Tuple[FrameMetric, ...] = (FrameMetric.MAE,)
 
 
 def train_eta(
@@ -35,7 +35,7 @@ def train_eta(
     num_features: Tuple[str, ...] = ETA_NUM_FEATURES,
     cat_features: Tuple[str, ...] = ETA_CAT_FEATURES,
     target: str = ETA_TARGET,
-    metrics: Optional[Tuple[FrameMetric]] = ETA_METRICS,
+    metrics: Optional[Tuple[FrameMetric, ...]] = ETA_METRICS,
     mlflow_tracking_uri: str = cfg.mlflow.uri(),
     test_size: float = DEFAULT_TEST_SIZE,
     partition_column: str = PARTITION_COLUMN,

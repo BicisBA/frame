@@ -5,11 +5,12 @@ import pathlib
 from typing import Dict, Callable
 
 from sklearn.metrics import (
-    confusion_matrix,
     mean_squared_error,
     mean_absolute_error,
     mean_absolute_percentage_error,
 )
+
+from frame.train.metrics import cm_dict, false_positives
 
 DEFAULT_SQLITE_LOC = pathlib.Path(__name__).parent.parent / "frame.db"
 DEFAULT_SQLITE = f"sqlite:////{DEFAULT_SQLITE_LOC.resolve()}"
@@ -49,13 +50,7 @@ class FrameMetric(str, enum.Enum):
     MAE = "MAE"
     MSE = "MSE"
     FP = "FP"
-
-
-def false_positives(y_test, y_pred):
-    _, fp, _, _ = confusion_matrix(
-        y_test, y_pred, labels=[1, 0], normalize="true"
-    ).ravel()
-    return fp
+    CM = "CM"
 
 
 METRICS_MAPPING: Dict[FrameMetric, Callable] = {
@@ -63,6 +58,7 @@ METRICS_MAPPING: Dict[FrameMetric, Callable] = {
     FrameMetric.MSE: mean_squared_error,
     FrameMetric.MAPE: mean_absolute_percentage_error,
     FrameMetric.FP: false_positives,
+    FrameMetric.CM: cm_dict,
 }
 
 DEFAULT_TEST_SIZE: float = 0.1
