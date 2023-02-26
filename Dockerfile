@@ -1,4 +1,4 @@
-FROM python:3.10-bullseye
+FROM python:3.9-bullseye
 RUN apt-get update && apt-get install -y postgresql-client
 RUN pip install poetry
 COPY . /app
