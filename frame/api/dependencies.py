@@ -29,11 +29,17 @@ def get_db():
 
 
 class MLFlowPredictor:
-    def __init__(self, model: FrameModels, tracking_uri: str = cfg.mlflow.uri()):
+    def __init__(
+        self,
+        model: FrameModels,
+        tracking_uri: str = cfg.mlflow.uri(),
+        probabilistic: bool = False,
+    ):
         self.model = model
         self.tracking_uri = tracking_uri
         self.pipeline: Optional[Pipeline] = None
         self.model_version: Optional[int] = None
+        self.probabilistic = probabilistic
 
     @property
     def initialized(self):
@@ -79,8 +85,11 @@ class MLFlowPredictor:
         if not self.initialized or self.pipeline is None:
             raise UninitializedPredictor("Predictor has not been initialized")
         X = pd.DataFrame(kwargs, index=[0])
-        return self.pipeline.predict(X)[0]
+        _f = (
+            self.pipeline.predict_proba if self.probabilistic else self.pipeline.predict
+        )
+        return _f(X)[0]
 
 
 ETAPredictor = MLFlowPredictor(FrameModels.ETA)
-AvailabilityPredictor = MLFlowPredictor(FrameModels.AVAILABILITY)
+AvailabilityPredictor = MLFlowPredictor(FrameModels.AVAILABILITY, probabilistic=True)
