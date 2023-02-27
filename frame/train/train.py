@@ -14,6 +14,7 @@ from sklearn.model_selection import train_test_split
 
 from frame.config import cfg
 from frame.data.datalake import connect
+from frame.ycm_casts import s3_or_local
 from frame.utils import with_env, get_logger
 from frame import __version__ as frame_version
 from frame.jinja import load_sql_query, render_sql_query
@@ -25,7 +26,7 @@ logger = get_logger(__name__)
 @with_env(
     MLFLOW_TRACKING_USERNAME=cfg.mlflow.username(),
     MLFLOW_TRACKING_PASSWORD=cfg.mlflow.password(),
-    MLFLOW_TRACKING_SERVER_CERT_PATH=cfg.mlflow.cert_path(),
+    MLFLOW_TRACKING_SERVER_CERT_PATH=cfg.mlflow.cert_path(cast=s3_or_local),
 )
 def train_model(
     model: FrameModels,

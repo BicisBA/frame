@@ -10,6 +10,7 @@ from sklearn.pipeline import Pipeline
 from mlflow.tracking import MlflowClient
 
 from frame.config import cfg
+from frame.ycm_casts import s3_or_local
 from frame.models.base import SessionLocal
 from frame.utils import with_env, get_logger
 from frame.exceptions import UninitializedPredictor
@@ -38,7 +39,7 @@ class MLFlowPredictor:
     @with_env(
         MLFLOW_TRACKING_USERNAME=cfg.mlflow.username(),
         MLFLOW_TRACKING_PASSWORD=cfg.mlflow.password(),
-        MLFLOW_TRACKING_SERVER_CERT_PATH=cfg.mlflow.cert_path(),
+        MLFLOW_TRACKING_SERVER_CERT_PATH=cfg.mlflow.cert_path(cast=s3_or_local),
     )
     def reload(self, stage: MLFlowStage = MLFlowStage.Production) -> None:
         try:
