@@ -1,7 +1,7 @@
 """Endpoints dependencies."""
 import os
 import operator as ops
-from typing import List, Optional
+from typing import List, Union, Optional
 
 import joblib
 import mlflow
@@ -34,7 +34,10 @@ class MLFlowPredictor:
         self.tracking_uri = tracking_uri
         self.pipeline: Optional[Pipeline] = None
         self.model_version: Optional[int] = None
-        self.initialized = False
+
+    @property
+    def initialized(self):
+        return self.pipeline is not None
 
     @with_env(
         MLFLOW_TRACKING_USERNAME=cfg.mlflow.username(),
@@ -67,17 +70,16 @@ class MLFlowPredictor:
             self.pipeline = joblib.load(latest_path)
 
             os.remove(latest_path)
-            self.initialized = True
         except mlflow.exceptions.MlflowException:
             logger.error(
                 "Could not fetch version for model %s", self.model, exc_info=True
             )
 
-    def predict(self, **kwargs):
-        if not self.initialized:
+    def predict(self, **kwargs) -> Union[float, bool, int]:
+        if not self.initialized or self.pipeline is None:
             raise UninitializedPredictor("Predictor has not been initialized")
         X = pd.DataFrame(kwargs, index=[0])
-        return self.pipeline.predict(X)
+        return self.pipeline.predict(X)[0]
 
 
 ETAPredictor = MLFlowPredictor(FrameModels.ETA)
