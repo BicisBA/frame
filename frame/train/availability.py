@@ -72,7 +72,7 @@ def train_availability(
         ),
         PartitionedMetaEstimator(
             RandomForestClassifier(
-                n_estimators=20, max_depth=50, class_weight={0: 1, 1: pos_weight or 1}
+                n_estimators=20, max_depth=10, class_weight={0: 1, 1: pos_weight or 1}
             ),
             partition_column,
         ),
