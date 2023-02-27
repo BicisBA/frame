@@ -30,7 +30,7 @@ app.include_router(stations_router)
 
 
 @app.on_event("startup")
-@repeat_every(seconds=86400, max_repetitions=None, logger=logger)
+@repeat_every(seconds=21600, max_repetitions=None, logger=logger)
 def refresh_stations_info() -> None:
     logger.info("Refreshing stations info")
     db = SessionLocal()
@@ -48,6 +48,7 @@ def refresh_stations_status() -> None:
 
 
 @app.on_event("startup")
+@repeat_every(seconds=3600, max_repetitions=None, logger=logger)
 @repeat_every(
     seconds=MODEL_RELOAD_SECONDS,
     max_repetitions=None,
