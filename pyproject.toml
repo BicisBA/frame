@@ -32,6 +32,7 @@ tqdm = "^4.64.1"
 mlflow = "^2.1.1"
 types-setuptools = "^67.3.0.1"
 llvmlite = ">=0.38"
+lightgbm = "^3.3.5"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
