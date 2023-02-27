@@ -1,11 +1,11 @@
 from typing import Dict, Union
 
 import numpy as np
-from tqdm import tqdm
 from sklearn.base import BaseEstimator, RegressorMixin, clone
+from tqdm import tqdm
 
-from frame.utils import get_logger
 from frame.constants import FALLBACK_KEY
+from frame.utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -57,6 +57,7 @@ class PartitionedMetaEstimator(BaseEstimator, RegressorMixin):
             if val not in self.regressors:
                 continue
             mask = X[self.partition_column] == val
+            print(mask)
             preds[mask] = self.regressors[val].predict_proba(X[mask])
 
         fallback = ~X[self.partition_column].isin(self.regressors.keys())
