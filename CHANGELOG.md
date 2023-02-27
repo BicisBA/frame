@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.3] - 2023-02-27
 ### Fixed
+- Metaestimator had no probability prediction
+
+## [1.0.3] - 2023-02-27
+### Fixed
 - Allow dependency predictor to return probabilities
 
 ## [1.0.2] - 2023-02-27
