@@ -1,24 +1,30 @@
+from datetime import datetime, timedelta
+import operator as ops
 import os
 import time
-import operator as ops
-from datetime import datetime, timedelta
 from typing import Tuple, Union, Callable, Optional
 
 import duckdb
 import joblib
 import mlflow
-from sklearn.pipeline import Pipeline
-from sklearn.base import BaseEstimator
 from mlflow.tracking import MlflowClient
+from sklearn.base import BaseEstimator
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
 
-from frame.config import cfg
-from frame.data.datalake import connect
-from frame.ycm_casts import s3_or_local
-from frame.utils import with_env, get_logger
 from frame import __version__ as frame_version
+from frame.config import cfg, env as CFG_ENV
+from frame.constants import (
+    MODELS_QUERIES,
+    DEFAULT_TEST_SIZE,
+    FrameModels,
+    MLFlowStage,
+    Environments,
+)
+from frame.data.datalake import connect
 from frame.jinja import load_sql_query, render_sql_query
-from frame.constants import MODELS_QUERIES, DEFAULT_TEST_SIZE, FrameModels, MLFlowStage
+from frame.utils import with_env, get_logger
+from frame.ycm_casts import s3_or_local
 
 logger = get_logger(__name__)
 
@@ -39,6 +45,7 @@ def train_model(
     test_size: float = DEFAULT_TEST_SIZE,
     metrics: Optional[Tuple[Callable]] = None,
     query: Optional[str] = None,
+    env: Environments = CFG_ENV,
     **query_kws,
 ):
     con = con if con is not None else connect()
@@ -57,7 +64,7 @@ def train_model(
 
     run_date = datetime.now()
 
-    experiment_name = f"prod_{model}"
+    experiment_name = f"{env}_{model}"
     run_name = f"{experiment_name}_{run_date}"
 
     try:

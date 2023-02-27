@@ -5,6 +5,7 @@ import pathlib
 from typing import Dict, Callable
 
 from sklearn.metrics import (
+    roc_auc_score,
     mean_squared_error,
     mean_absolute_error,
     mean_absolute_percentage_error,
@@ -53,6 +54,7 @@ class FrameMetric(str, enum.Enum):
     FP = "FP"
     TN = "TN"
     TP = "TP"
+    ROC_AUC = "ROC_AUC"
 
 
 METRICS_MAPPING: Dict[FrameMetric, Callable] = {
@@ -63,6 +65,7 @@ METRICS_MAPPING: Dict[FrameMetric, Callable] = {
     FrameMetric.FP: fp,
     FrameMetric.TN: tn,
     FrameMetric.TP: tp,
+    FrameMetric.ROC_AUC: roc_auc_score
 }
 
 DEFAULT_TEST_SIZE: float = 0.1
