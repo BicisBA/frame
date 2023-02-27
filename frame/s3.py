@@ -3,6 +3,7 @@ import boto3
 from frame.config import cfg
 from frame.utils import get_logger
 from frame.cert import download_cert
+from frame.ycm_casts import prepend_https
 
 logger = get_logger(__name__)
 
@@ -14,7 +15,7 @@ class S3Client:
         if cls._instance is None:
             cls._instance = super(S3Client, cls).__new__(cls)
 
-            endpoint_url = cfg.s3.endpoint_url(default=None)
+            endpoint_url = cfg.s3.endpoint_url(default=None, cast=prepend_https)
             if endpoint_url is not None:
                 logger.info("S3 endpoint is %s", endpoint_url)
 
