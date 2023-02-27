@@ -91,10 +91,9 @@ def train_model(
 
         logger.info("Logging metrics")
         if metrics is not None:
+            preds = estimator.predict(X_test)
             for metric in metrics:
-                mlflow.log_metric(
-                    metric.__name__, metric(y_test, estimator.predict(X_test))
-                )
+                mlflow.log_metric(metric.__name__, metric(y_test, preds))
 
         mlflow.log_metric("train_samples", len(X_train))
         mlflow.log_metric("test_samples", len(X_test))

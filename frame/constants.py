@@ -10,7 +10,7 @@ from sklearn.metrics import (
     mean_absolute_percentage_error,
 )
 
-from frame.train.metrics import cm_dict, false_positives
+from frame.train.metrics import fn, fp, tn, tp
 
 DEFAULT_SQLITE_LOC = pathlib.Path(__name__).parent.parent / "frame.db"
 DEFAULT_SQLITE = f"sqlite:////{DEFAULT_SQLITE_LOC.resolve()}"
@@ -49,16 +49,20 @@ class FrameMetric(str, enum.Enum):
     MAPE = "MAPE"
     MAE = "MAE"
     MSE = "MSE"
+    FN = "FN"
     FP = "FP"
-    CM = "CM"
+    TN = "TN"
+    TP = "TP"
 
 
 METRICS_MAPPING: Dict[FrameMetric, Callable] = {
     FrameMetric.MAE: mean_absolute_error,
     FrameMetric.MSE: mean_squared_error,
     FrameMetric.MAPE: mean_absolute_percentage_error,
-    FrameMetric.FP: false_positives,
-    FrameMetric.CM: cm_dict,
+    FrameMetric.FN: fn,
+    FrameMetric.FP: fp,
+    FrameMetric.TN: tn,
+    FrameMetric.TP: tp,
 }
 
 DEFAULT_TEST_SIZE: float = 0.1

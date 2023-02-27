@@ -1,15 +1,29 @@
-import pandas as pd
 from sklearn.metrics import confusion_matrix
 
 
-def false_positives(y_true, y_pred):
-    _, fp, _, _ = confusion_matrix(
-        y_true, y_pred, labels=[1, 0], normalize="true"
+def tn(y_true, y_pred):
+    _tn, _, _, _ = confusion_matrix(
+        y_true, y_pred, labels=[0, 1], normalize="true"
     ).ravel()
-    return fp
+    return _tn
 
 
-def cm_json(y_true, y_pred):
-    conf_matrix = confusion_matrix(y_true, y_pred, labels=[1, 0])
-    conf_matrix = pd.DataFrame(conf_matrix, columns=[False, True], index=[False, True])
-    return conf_matrix.to_json()
+def fp(y_true, y_pred):
+    _, _fp, _, _ = confusion_matrix(
+        y_true, y_pred, labels=[0, 1], normalize="true"
+    ).ravel()
+    return _fp
+
+
+def fn(y_true, y_pred):
+    _, _, _fn, _ = confusion_matrix(
+        y_true, y_pred, labels=[0, 1], normalize="true"
+    ).ravel()
+    return _fn
+
+
+def tp(y_true, y_pred):
+    _, _, _, _tp = confusion_matrix(
+        y_true, y_pred, labels=[0, 1], normalize="true"
+    ).ravel()
+    return _tp
