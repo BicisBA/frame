@@ -9,7 +9,7 @@ def false_positives(y_true, y_pred):
     return fp
 
 
-def cm_dict(y_true, y_pred):
+def cm_json(y_true, y_pred):
     conf_matrix = confusion_matrix(y_true, y_pred, labels=[1, 0])
     conf_matrix = pd.DataFrame(conf_matrix, columns=[False, True], index=[False, True])
-    return conf_matrix.to_dict()
+    return conf_matrix.to_json()
