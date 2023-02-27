@@ -1,30 +1,11 @@
-import pathlib
-import tempfile
-
 import boto3
 
 from frame.config import cfg
 from frame.utils import get_logger
+from frame.cert import download_cert
+from frame.ycm_casts import prepend_https
 
 logger = get_logger(__name__)
-
-
-def download_cert(
-    endpoint_url: str, access_key: str, secret_key: str, bucket: str, prefix: str
-) -> str:
-    filename = prefix.split("/")[-1]
-    cert_location = str(pathlib.Path().joinpath(tempfile.gettempdir(), filename))
-
-    minio = boto3.resource(
-        "s3",
-        endpoint_url=endpoint_url,
-        aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key,
-        verify=False,
-    )
-    minio.Bucket(bucket).Object(prefix).download_file(cert_location)
-
-    return str(cert_location)
 
 
 class S3Client:
@@ -34,7 +15,7 @@ class S3Client:
         if cls._instance is None:
             cls._instance = super(S3Client, cls).__new__(cls)
 
-            endpoint_url = cfg.s3.endpoint_url(default=None)
+            endpoint_url = cfg.s3.endpoint_url(default=None, cast=prepend_https)
             if endpoint_url is not None:
                 logger.info("S3 endpoint is %s", endpoint_url)
 
@@ -46,7 +27,7 @@ class S3Client:
 
             s3_cert = cfg.s3.cert(default=None)
 
-            if s3_cert is not None:
+            if s3_cert is not None and s3_cert != "":
                 logger.info(
                     "Looking for certificate in bucket %s at prefix %s", bucket, s3_cert
                 )
@@ -65,8 +46,10 @@ class S3Client:
             else:
                 cls._boto_client = boto3.resource(
                     "s3",
+                    endpoint_url=endpoint_url,
                     aws_access_key_id=access_key,
                     aws_secret_access_key=secret_key,
+                    verify=False,
                 )
 
         return cls._instance

@@ -1,0 +1,8 @@
+tests/
+frame.db
+*.ipynb
+locust/
+.pytest_cache
+.ipynb_checkpoints
+.mypy_cache
+.git

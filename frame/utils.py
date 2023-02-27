@@ -1,6 +1,9 @@
 """Common code undeserving of its own module."""
 
+import os
 import logging
+import contextlib
+from functools import wraps
 
 import typer
 
@@ -64,3 +67,26 @@ def config_logging(verbose: int = DEFAULT_VERBOSE, pretty: bool = DEFAULT_PRETTY
 def get_logger(name: str):
     """Create a new logger for name."""
     return logging.getLogger(name)
+
+
+@contextlib.contextmanager
+def temp_env(**environ):
+    old_environ = dict(os.environ)
+    os.environ.update(environ)
+    try:
+        yield
+    finally:
+        os.environ.clear()
+        os.environ.update(old_environ)
+
+
+def with_env(**environ):
+    def actual_decorator(f):
+        @wraps(f)
+        def _decorator(*args, **kwargs):
+            with temp_env(**environ):
+                return f(*args, **kwargs)
+
+        return _decorator
+
+    return actual_decorator

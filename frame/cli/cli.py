@@ -3,11 +3,13 @@ import logging
 import typer
 import uvicorn
 
+from frame.cli.train import cli as train_cli
 from frame.cli.stations import cli as stations_cli
 from frame.utils import DEFAULT_PRETTY, DEFAULT_VERBOSE, config_logging
 
 cli = typer.Typer()
 cli.add_typer(stations_cli, name="stations")
+cli.add_typer(train_cli, name="train")
 
 
 @cli.callback()
