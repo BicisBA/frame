@@ -49,6 +49,7 @@ class PartitionedMetaEstimator(BaseEstimator, RegressorMixin):
 
     def predict_proba(self, X):
         if not hasattr(self.regressors[FALLBACK_KEY], "predict_proba"):
+            logger.info("Regressors have no attribute predict_proba")
             return self.predict(X)
 
         preds = np.empty(len(X))
@@ -57,10 +58,12 @@ class PartitionedMetaEstimator(BaseEstimator, RegressorMixin):
             if val not in self.regressors:
                 continue
             mask = X[self.partition_column] == val
-            preds[mask] = self.regressors[val].predict_proba(X[mask])
+            preds[mask] = self.regressors[val].predict_proba(X[mask])[:, 1]
 
         fallback = ~X[self.partition_column].isin(self.regressors.keys())
         if fallback.sum() > 0:
-            preds[fallback] = self.regressors[FALLBACK_KEY].predict_proba(X[fallback])
+            preds[fallback] = self.regressors[FALLBACK_KEY].predict_proba(X[fallback])[
+                :, 1
+            ]
 
         return preds
