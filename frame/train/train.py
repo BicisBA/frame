@@ -18,7 +18,13 @@ from frame.ycm_casts import s3_or_local
 from frame.utils import with_env, get_logger
 from frame import __version__ as frame_version
 from frame.jinja import load_sql_query, render_sql_query
-from frame.constants import MODELS_QUERIES, DEFAULT_TEST_SIZE, FrameModels, MLFlowStage
+from frame.constants import (
+    MODELS_QUERIES,
+    DEFAULT_TEST_SIZE,
+    DEFAULT_MODEL_COMPRESSION,
+    FrameModels,
+    MLFlowStage,
+)
 
 logger = get_logger(__name__)
 
@@ -39,6 +45,9 @@ def train_model(
     test_size: float = DEFAULT_TEST_SIZE,
     metrics: Optional[Tuple[Callable]] = None,
     query: Optional[str] = None,
+    model_compression: Optional[
+        Union[int, bool, Tuple[str, int]]
+    ] = DEFAULT_MODEL_COMPRESSION,
     **query_kws,
 ):
     con = con if con is not None else connect()
@@ -102,7 +111,11 @@ def train_model(
         estimator_path = f"{model}.joblib"
 
         logger.info("Dumping estimator")
-        joblib.dump(estimator, estimator_path)
+        joblib.dump(
+            estimator,
+            estimator_path,
+            compress=model_compression if model_compression is not None else 0,
+        )
         mlflow.log_artifact(estimator_path)
 
         new_version = mlflow_client.create_model_version(

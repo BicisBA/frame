@@ -70,3 +70,4 @@ DEFAULT_TEST_SIZE: float = 0.1
 FALLBACK_KEY: str = "fallback"
 
 MODEL_RELOAD_SECONDS: int = 60 * 5
+DEFAULT_MODEL_COMPRESSION = ("lzma", 3)
