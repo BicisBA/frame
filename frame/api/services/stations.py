@@ -171,6 +171,8 @@ def predict(
         user_eta=prediction_params.user_eta,
         user_lat=prediction_params.user_lat,
         user_lon=prediction_params.user_lon,
+        eta_model_version=eta_predictor.model_version,
+        availability_model_version=availability_predictor.model_version,
     )
     db.add(new_prediction)
     db.commit()

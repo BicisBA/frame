@@ -66,10 +66,11 @@ class MLFlowPredictor:
                 versions, key=ops.attrgetter("creation_timestamp")
             )
 
-            if self.model_version is not None and self.model_version == latest:
+            if self.model_version is not None and self.model_version == latest.version:
                 logger.info("Already at latest model for %s", self.model)
                 return
 
+            self.model_version = latest.version
             latest_path = mlflow.artifacts.download_artifacts(
                 artifact_path=f"{self.model}.joblib", run_id=latest.run_id
             )
