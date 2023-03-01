@@ -6,11 +6,17 @@ from sklearn.pipeline import make_pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from frame.config import cfg
 from frame.utils import get_logger
 from frame.train.train import train_model
+from frame.config import cfg, env as CFG_ENV
 from frame.train.metaestimator import PartitionedMetaEstimator
-from frame.constants import METRICS_MAPPING, DEFAULT_TEST_SIZE, FrameMetric, FrameModels
+from frame.constants import (
+    METRICS_MAPPING,
+    DEFAULT_TEST_SIZE,
+    FrameMetric,
+    FrameModels,
+    Environments,
+)
 
 logger = get_logger(__name__)
 
@@ -51,6 +57,7 @@ def train_availability(
     partition_column: str = AVAILABILITY_PARTITION_COLUMN,
     neg_weight: Optional[int] = NEG_WEIGHT,
     pos_weight: Optional[int] = POS_WEIGHT,
+    env: Environments = CFG_ENV,
 ):
 
     pipeline = make_pipeline(
@@ -94,4 +101,5 @@ def train_availability(
         end_date=end_date,
         mlflow_tracking_uri=mlflow_tracking_uri,
         test_size=test_size,
+        env=env,
     )

@@ -3,9 +3,9 @@ from datetime import datetime
 
 import typer
 
-from frame.config import cfg
 from frame.utils import get_logger
-from frame.constants import DEFAULT_TEST_SIZE, FrameMetric
+from frame.config import cfg, env as CFG_ENV
+from frame.constants import DEFAULT_TEST_SIZE, FrameMetric, Environments
 from frame.train.eta import (
     ETA_TARGET,
     ETA_METRICS,
@@ -41,6 +41,7 @@ def eta(
     mlflow_tracking_uri: str = cfg.mlflow.uri(),
     test_size: float = typer.Option(DEFAULT_TEST_SIZE, min=0.0, max=1.0),
     partition_column: str = PARTITION_COLUMN,
+    env: Environments = CFG_ENV,
 ):
     train_eta(
         start_date=start_date,
@@ -52,6 +53,7 @@ def eta(
         mlflow_tracking_uri=mlflow_tracking_uri,
         test_size=test_size,
         partition_column=partition_column,
+        env=env,
     )
 
 
@@ -68,6 +70,7 @@ def availability(
     partition_column: str = AVAILABILITY_PARTITION_COLUMN,
     neg_weight: int = AVAILABILITY_NEG_WEIGHT,
     pos_weight: int = AVAILABILITY_POS_WEIGHT,
+    env: Environments = CFG_ENV,
 ):
     train_availability(
         start_date=start_date,
@@ -81,4 +84,5 @@ def availability(
         partition_column=partition_column,
         neg_weight=neg_weight,
         pos_weight=pos_weight,
+        env=env,
     )
