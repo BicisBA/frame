@@ -57,7 +57,8 @@ def train_model(
     t0 = time.time()
     dataset = con.execute(rendered_query).df().dropna()
     t1 = time.time()
-    logger.info("Query finished in %s", timedelta(seconds=t1 - t0))
+    query_time = t1 - t0
+    logger.info("Query finished in %s", timedelta(seconds=query_time))
     logger.info("Total dataset size %s", len(dataset))
 
     mlflow_client = MlflowClient(mlflow_tracking_uri)
@@ -105,6 +106,7 @@ def train_model(
 
         mlflow.log_metric("train_samples", len(X_train))
         mlflow.log_metric("test_samples", len(X_test))
+        mlflow.log_metric("query_time", query_time)
 
         estimator_path = f"{model}.joblib"
 
