@@ -46,6 +46,7 @@ def train_model(
     metrics: Optional[Tuple[Callable]] = None,
     query: Optional[str] = None,
     env: Environments = CFG_ENV,
+    experiment_suffix: Optional[str] = None,
     **query_kws,
 ):
     con = con if con is not None else connect()
@@ -66,6 +67,9 @@ def train_model(
     run_date = datetime.now()
 
     experiment_name = f"{env}_{model}"
+    if experiment_suffix is not None:
+        experiment_name = f"{experiment_name}{experiment_suffix}"
+
     run_name = f"{experiment_name}_{run_date}"
 
     try:
