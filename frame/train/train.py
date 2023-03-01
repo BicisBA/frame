@@ -112,11 +112,12 @@ def train_model(
         joblib.dump(estimator, estimator_path, JOBLIB_COMPRESSION)
         mlflow.log_artifact(estimator_path)
 
-        new_version = mlflow_client.create_model_version(
-            model, estimator_path, run.info.run_id
-        )
-        mlflow_client.transition_model_version_stage(
-            model, new_version.version, MLFlowStage.Production.value
-        )
+        if env == Environments.PROD:
+            new_version = mlflow_client.create_model_version(
+                model, estimator_path, run.info.run_id
+            )
+            mlflow_client.transition_model_version_stage(
+                model, new_version.version, MLFlowStage.Production.value
+            )
 
         os.remove(estimator_path)
