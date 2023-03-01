@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import Tuple, Optional
 
+from lightgbm import LGBMClassifier
 from sklearn.pipeline import make_pipeline
 from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from frame.config import cfg
@@ -35,7 +35,8 @@ AVAILABILITY_METRICS: Tuple[FrameMetric, ...] = (
     FrameMetric.TN,
 )
 
-POS_WEIGHT: int = 500
+NEG_WEIGHT: int = 500
+POS_WEIGHT: int = 1
 
 
 def train_availability(
@@ -48,6 +49,7 @@ def train_availability(
     mlflow_tracking_uri: str = cfg.mlflow.uri(),
     test_size: float = DEFAULT_TEST_SIZE,
     partition_column: str = AVAILABILITY_PARTITION_COLUMN,
+    neg_weight: Optional[int] = NEG_WEIGHT,
     pos_weight: Optional[int] = POS_WEIGHT,
 ):
 
@@ -71,8 +73,10 @@ def train_availability(
             verbose_feature_names_out=False,
         ),
         PartitionedMetaEstimator(
-            RandomForestClassifier(
-                n_estimators=20, max_depth=10, class_weight={0: 1, 1: pos_weight or 1}
+            LGBMClassifier(
+                class_weight={0: neg_weight or 1, 1: pos_weight or 1},
+                n_estimators=5,
+                max_depth=6,
             ),
             partition_column,
         ),

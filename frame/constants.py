@@ -65,7 +65,7 @@ METRICS_MAPPING: Dict[FrameMetric, Callable] = {
     FrameMetric.FP: fp,
     FrameMetric.TN: tn,
     FrameMetric.TP: tp,
-    FrameMetric.ROC_AUC: roc_auc_score
+    FrameMetric.ROC_AUC: roc_auc_score,
 }
 
 DEFAULT_TEST_SIZE: float = 0.1
@@ -73,3 +73,6 @@ DEFAULT_TEST_SIZE: float = 0.1
 FALLBACK_KEY: str = "fallback"
 
 MODEL_RELOAD_SECONDS: int = 60 * 5
+
+JOBLIB_COMPRESSION_ALGORITHM: str = "lzma"
+JOBLIB_COMPRESSION_LEVEL: int = 3

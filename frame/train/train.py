@@ -1,19 +1,23 @@
-from datetime import datetime, timedelta
-import operator as ops
 import os
 import time
+import operator as ops
+from datetime import datetime, timedelta
 from typing import Tuple, Union, Callable, Optional
 
 import duckdb
 import joblib
 import mlflow
-from mlflow.tracking import MlflowClient
-from sklearn.base import BaseEstimator
-from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
+from sklearn.base import BaseEstimator
+from mlflow.tracking import MlflowClient
+from sklearn.model_selection import train_test_split
 
+from frame.data.datalake import connect
+from frame.ycm_casts import s3_or_local
+from frame.utils import with_env, get_logger
 from frame import __version__ as frame_version
-from frame.config import cfg, env as CFG_ENV
+from frame.jinja import load_sql_query, render_sql_query
+from frame.config import JOBLIB_COMPRESSION, cfg, env as CFG_ENV
 from frame.constants import (
     MODELS_QUERIES,
     DEFAULT_TEST_SIZE,
@@ -21,10 +25,6 @@ from frame.constants import (
     MLFlowStage,
     Environments,
 )
-from frame.data.datalake import connect
-from frame.jinja import load_sql_query, render_sql_query
-from frame.utils import with_env, get_logger
-from frame.ycm_casts import s3_or_local
 
 logger = get_logger(__name__)
 
@@ -109,7 +109,7 @@ def train_model(
         estimator_path = f"{model}.joblib"
 
         logger.info("Dumping estimator")
-        joblib.dump(estimator, estimator_path)
+        joblib.dump(estimator, estimator_path, JOBLIB_COMPRESSION)
         mlflow.log_artifact(estimator_path)
 
         new_version = mlflow_client.create_model_version(

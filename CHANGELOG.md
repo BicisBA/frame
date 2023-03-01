@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2023-02-28
+### Added
+- Allow to modify availability positive class weight
+
+## [2.2.0] - 2023-02-28
+### Added
+- Compress models on upload
+
+## [2.1.0] - 2023-02-28
+### Added
+- Persist models versions used for predictions in db
+
+## [2.0.0] - 2023-02-28
+### Changed
+- Modify negative class weight for availability
+
+## [1.0.5] - 2023-02-27
+### Fixed
+- Metaestimator predict proba bug
+
 ## [1.0.4] - 2023-02-27
 ### Fixed
 - Metaestimator had no probability prediction
