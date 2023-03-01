@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.3.0] - 2023-02-28
 ### Added
-- Allow to modify availability's positive class weight
+- Allow to modify availability positive class weight
 
 ## [2.2.0] - 2023-02-28
 ### Added
