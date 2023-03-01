@@ -12,11 +12,11 @@ from sklearn.base import BaseEstimator
 from mlflow.tracking import MlflowClient
 from sklearn.model_selection import train_test_split
 
-from frame.config import cfg
 from frame.data.datalake import connect
 from frame.ycm_casts import s3_or_local
 from frame.utils import with_env, get_logger
 from frame import __version__ as frame_version
+from frame.config import JOBLIB_COMPRESSION, cfg
 from frame.jinja import load_sql_query, render_sql_query
 from frame.constants import MODELS_QUERIES, DEFAULT_TEST_SIZE, FrameModels, MLFlowStage
 
@@ -102,7 +102,7 @@ def train_model(
         estimator_path = f"{model}.joblib"
 
         logger.info("Dumping estimator")
-        joblib.dump(estimator, estimator_path)
+        joblib.dump(estimator, estimator_path, JOBLIB_COMPRESSION)
         mlflow.log_artifact(estimator_path)
 
         new_version = mlflow_client.create_model_version(
