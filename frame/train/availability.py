@@ -35,7 +35,8 @@ AVAILABILITY_METRICS: Tuple[FrameMetric, ...] = (
     FrameMetric.TN,
 )
 
-NEG_WEIGHT: int = 10000
+NEG_WEIGHT: int = 500
+POS_WEIGHT: int = 1
 
 
 def train_availability(
@@ -49,6 +50,7 @@ def train_availability(
     test_size: float = DEFAULT_TEST_SIZE,
     partition_column: str = AVAILABILITY_PARTITION_COLUMN,
     neg_weight: Optional[int] = NEG_WEIGHT,
+    pos_weight: Optional[int] = POS_WEIGHT,
 ):
 
     pipeline = make_pipeline(
@@ -72,7 +74,9 @@ def train_availability(
         ),
         PartitionedMetaEstimator(
             LGBMClassifier(
-                class_weight={0: neg_weight or 1, 1: 1}, n_estimators=5, max_depth=6
+                class_weight={0: neg_weight or 1, 1: pos_weight or 1},
+                n_estimators=5,
+                max_depth=6,
             ),
             partition_column,
         ),

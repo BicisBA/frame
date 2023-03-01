@@ -16,6 +16,7 @@ from frame.train.eta import (
 )
 from frame.train.availability import (
     NEG_WEIGHT as AVAILABILITY_NEG_WEIGHT,
+    POS_WEIGHT as AVAILABILITY_POS_WEIGHT,
     AVAILABILITY_TARGET,
     AVAILABILITY_METRICS,
     AVAILABILITY_CAT_FEATURES,
@@ -66,6 +67,7 @@ def availability(
     test_size: float = typer.Option(DEFAULT_TEST_SIZE, min=0.0, max=1.0),
     partition_column: str = AVAILABILITY_PARTITION_COLUMN,
     neg_weight: int = AVAILABILITY_NEG_WEIGHT,
+    pos_weight: int = AVAILABILITY_POS_WEIGHT,
 ):
     train_availability(
         start_date=start_date,
@@ -78,4 +80,5 @@ def availability(
         test_size=test_size,
         partition_column=partition_column,
         neg_weight=neg_weight,
+        pos_weight=pos_weight,
     )
