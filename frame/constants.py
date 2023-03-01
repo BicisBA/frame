@@ -5,6 +5,7 @@ import pathlib
 from typing import Dict, Callable
 
 from sklearn.metrics import (
+    roc_auc_score,
     mean_squared_error,
     mean_absolute_error,
     mean_absolute_percentage_error,
@@ -16,7 +17,7 @@ DEFAULT_SQLITE_LOC = pathlib.Path(__name__).parent.parent / "frame.db"
 DEFAULT_SQLITE = f"sqlite:////{DEFAULT_SQLITE_LOC.resolve()}"
 
 
-class Environments(enum.Enum):
+class Environments(str, enum.Enum):
     DEV = "dev"
     PROD = "prod"
     TEST = "test"
@@ -53,6 +54,7 @@ class FrameMetric(str, enum.Enum):
     FP = "FP"
     TN = "TN"
     TP = "TP"
+    ROC_AUC = "ROC_AUC"
 
 
 METRICS_MAPPING: Dict[FrameMetric, Callable] = {
@@ -63,6 +65,7 @@ METRICS_MAPPING: Dict[FrameMetric, Callable] = {
     FrameMetric.FP: fp,
     FrameMetric.TN: tn,
     FrameMetric.TP: tp,
+    FrameMetric.ROC_AUC: roc_auc_score,
 }
 
 DEFAULT_TEST_SIZE: float = 0.1

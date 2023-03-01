@@ -16,9 +16,15 @@ from frame.data.datalake import connect
 from frame.ycm_casts import s3_or_local
 from frame.utils import with_env, get_logger
 from frame import __version__ as frame_version
-from frame.config import JOBLIB_COMPRESSION, cfg
 from frame.jinja import load_sql_query, render_sql_query
-from frame.constants import MODELS_QUERIES, DEFAULT_TEST_SIZE, FrameModels, MLFlowStage
+from frame.config import JOBLIB_COMPRESSION, cfg, env as CFG_ENV
+from frame.constants import (
+    MODELS_QUERIES,
+    DEFAULT_TEST_SIZE,
+    FrameModels,
+    MLFlowStage,
+    Environments,
+)
 
 logger = get_logger(__name__)
 
@@ -39,6 +45,8 @@ def train_model(
     test_size: float = DEFAULT_TEST_SIZE,
     metrics: Optional[Tuple[Callable]] = None,
     query: Optional[str] = None,
+    env: Environments = CFG_ENV,
+    experiment_suffix: Optional[str] = None,
     **query_kws,
 ):
     con = con if con is not None else connect()
@@ -50,14 +58,18 @@ def train_model(
     t0 = time.time()
     dataset = con.execute(rendered_query).df().dropna()
     t1 = time.time()
-    logger.info("Query finished in %s", timedelta(seconds=t1 - t0))
+    query_time = t1 - t0
+    logger.info("Query finished in %s", timedelta(seconds=query_time))
     logger.info("Total dataset size %s", len(dataset))
 
     mlflow_client = MlflowClient(mlflow_tracking_uri)
 
     run_date = datetime.now()
 
-    experiment_name = f"prod_{model}"
+    experiment_name = f"{env}_{model}"
+    if experiment_suffix is not None:
+        experiment_name = f"{experiment_name}{experiment_suffix}"
+
     run_name = f"{experiment_name}_{run_date}"
 
     try:
@@ -98,6 +110,7 @@ def train_model(
 
         mlflow.log_metric("train_samples", len(X_train))
         mlflow.log_metric("test_samples", len(X_test))
+        mlflow.log_metric("query_time", query_time)
 
         estimator_path = f"{model}.joblib"
 
@@ -105,11 +118,12 @@ def train_model(
         joblib.dump(estimator, estimator_path, JOBLIB_COMPRESSION)
         mlflow.log_artifact(estimator_path)
 
-        new_version = mlflow_client.create_model_version(
-            model, estimator_path, run.info.run_id
-        )
-        mlflow_client.transition_model_version_stage(
-            model, new_version.version, MLFlowStage.Production.value
-        )
+        if env == Environments.PROD:
+            new_version = mlflow_client.create_model_version(
+                model, estimator_path, run.info.run_id
+            )
+            mlflow_client.transition_model_version_stage(
+                model, new_version.version, MLFlowStage.Production.value
+            )
 
         os.remove(estimator_path)

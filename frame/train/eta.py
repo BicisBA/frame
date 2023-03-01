@@ -6,11 +6,17 @@ from sklearn.compose import ColumnTransformer
 from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from frame.config import cfg
 from frame.utils import get_logger
 from frame.train.train import train_model
+from frame.config import cfg, env as CFG_ENV
 from frame.train.metaestimator import PartitionedMetaEstimator
-from frame.constants import METRICS_MAPPING, DEFAULT_TEST_SIZE, FrameMetric, FrameModels
+from frame.constants import (
+    METRICS_MAPPING,
+    DEFAULT_TEST_SIZE,
+    FrameMetric,
+    FrameModels,
+    Environments,
+)
 
 logger = get_logger(__name__)
 
@@ -39,6 +45,7 @@ def train_eta(
     mlflow_tracking_uri: str = cfg.mlflow.uri(),
     test_size: float = DEFAULT_TEST_SIZE,
     partition_column: str = PARTITION_COLUMN,
+    env: Environments = CFG_ENV,
 ):
 
     pipeline = make_pipeline(
@@ -77,4 +84,5 @@ def train_eta(
         end_date=end_date,
         mlflow_tracking_uri=mlflow_tracking_uri,
         test_size=test_size,
+        env=env,
     )

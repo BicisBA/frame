@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "frame"
-version = "2.3.0"
+version = "2.4.0"
 description = "Backend for BicisBA."
 authors = ["CrossNox <ijmermet@gmail.com>"]
 license = "MIT"
@@ -54,7 +54,7 @@ certifi = "^2022.9.24"
 extension-pkg-allow-list = ["duckdb"]
 
 [tool.pylint."MESSAGES CONTROL"]
-disable = [ "C", "fixme", "too-few-public-methods", "R0801", "no-name-in-module", "W0707", "too-many-locals", "too-many-arguments"]
+disable = [ "C", "fixme", "too-few-public-methods", "R0801", "no-name-in-module", "W0707", "too-many-locals", "too-many-arguments", "too-many-statements"]
 
 [tool.pylint.MASTER]
 jobs = 1
