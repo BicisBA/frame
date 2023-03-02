@@ -7,6 +7,7 @@ from typing import Tuple, Union, Callable, Optional
 import duckdb
 import joblib
 import mlflow
+import pandas as pd
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator
 from mlflow.tracking import MlflowClient
@@ -27,6 +28,34 @@ from frame.constants import (
 )
 
 logger = get_logger(__name__)
+
+
+def postprocess_dataset_availability(dataset: pd.DataFrame) -> pd.DataFrame:
+    dfs_to_concat = []
+    for i in list(range(1, 7)) + list(range(7, 18, 3)):
+        dfs_to_concat.append(
+            dataset[
+                [
+                    "station_id",
+                    "hour",
+                    "dow",
+                    "num_bikes_available",
+                    "num_bikes_disabled",
+                    "num_docks_available",
+                    "num_docks_disabled",
+                    "status",
+                    f"minutes_bt_check_{i}",
+                    f"remaining_bikes_available_{i}",
+                ]
+            ].rename(
+                columns={
+                    f"minutes_bt_check_{i}": "minutes_bt_check",
+                    f"remaining_bikes_available_{i}": "remaining_bikes_available",
+                }
+            )
+        )
+
+    return pd.concat(dfs_to_concat).dropna().drop_duplicates()
 
 
 @with_env(
@@ -57,6 +86,8 @@ def train_model(
     logger.info("Executing query")
     t0 = time.time()
     dataset = con.execute(rendered_query).df().dropna()
+    if model == FrameModels.AVAILABILITY:
+        dataset = postprocess_dataset_availability(dataset)
     t1 = time.time()
     query_time = t1 - t0
     logger.info("Query finished in %s", timedelta(seconds=query_time))
