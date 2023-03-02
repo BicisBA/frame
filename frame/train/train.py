@@ -45,12 +45,12 @@ def postprocess_dataset_availability(dataset: pd.DataFrame) -> pd.DataFrame:
                     "num_docks_disabled",
                     "status",
                     f"minutes_bt_check_{i}",
-                    f"remaining_bikes_available_{i}",
+                    f"bikes_available_{i}",
                 ]
             ].rename(
                 columns={
                     f"minutes_bt_check_{i}": "minutes_bt_check",
-                    f"remaining_bikes_available_{i}": "remaining_bikes_available",
+                    f"bikes_available_{i}": "bikes_available",
                 }
             )
         )
