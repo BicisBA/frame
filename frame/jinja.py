@@ -49,6 +49,21 @@ between {_make_timestamp(start_date)}
 and {_make_timestamp(end_date)} - INTERVAL 1 SECOND"""
 
 
+def filter_dates(start_date: date, end_date: date) -> str:
+    """Filter dates using each column."""
+
+    # Is start_date <= year-month-day <= end_date?
+    return f"""(
+    ({start_date.year} < year) or
+    ({start_date.year} = year and {start_date.month} < month) or
+    ({start_date.year} = year and {start_date.month} = month and {start_date.day} <= day)
+) and (
+    (year < {end_date.year}) or
+    (year = {end_date.year} and month < {end_date.month}) or
+    (year = {end_date.year} and month = {end_date.month} and day <= {end_date.day})
+)"""
+
+
 def load_sql_query(filename: str) -> str:
     """Load a SQL query from package resources.
 
