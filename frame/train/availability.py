@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Tuple, Optional
+from typing import List, Tuple, Optional
 
 import pandas as pd
 from lightgbm import LGBMClassifier
@@ -45,6 +45,8 @@ AVAILABILITY_METRICS: Tuple[FrameMetric, ...] = (
 NEG_WEIGHT: int = 500
 POS_WEIGHT: int = 1
 
+DEFAULT_MINUTES_TO_EVAL: List[int] = list(range(1, 7)) + list(range(7, 18, 3))
+
 
 def postprocess_dataset_availability(dataset: pd.DataFrame) -> pd.DataFrame:
     dataset["id"] = dataset.index
@@ -76,6 +78,7 @@ def train_availability(
     neg_weight: Optional[int] = NEG_WEIGHT,
     pos_weight: Optional[int] = POS_WEIGHT,
     env: Environments = CFG_ENV,
+    minutes_to_eval: List[int] = DEFAULT_MINUTES_TO_EVAL,
 ):
 
     pipeline = make_pipeline(
@@ -122,4 +125,5 @@ def train_availability(
         stratify=partition_column,
         env=env,
         dataset_transformations=[postprocess_dataset_availability],
+        minutes_to_eval=minutes_to_eval,
     )

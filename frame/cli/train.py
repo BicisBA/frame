@@ -19,6 +19,7 @@ from frame.train.availability import (
     POS_WEIGHT as AVAILABILITY_POS_WEIGHT,
     AVAILABILITY_TARGET,
     AVAILABILITY_METRICS,
+    DEFAULT_MINUTES_TO_EVAL,
     AVAILABILITY_CAT_FEATURES,
     AVAILABILITY_NUM_FEATURES,
     AVAILABILITY_PARTITION_COLUMN,
@@ -71,6 +72,7 @@ def availability(
     neg_weight: int = AVAILABILITY_NEG_WEIGHT,
     pos_weight: int = AVAILABILITY_POS_WEIGHT,
     env: Environments = CFG_ENV,
+    minutes_to_eval: List[int] = DEFAULT_MINUTES_TO_EVAL,
 ):
     train_availability(
         start_date=start_date,
@@ -85,4 +87,5 @@ def availability(
         neg_weight=neg_weight,
         pos_weight=pos_weight,
         env=env,
+        minutes_to_eval=minutes_to_eval,
     )
