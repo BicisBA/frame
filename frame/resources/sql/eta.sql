@@ -31,9 +31,11 @@ status_by_minute AS (
     	num_docks_available,
     	num_docks_disabled,
     	minute(lead(ts, {{i}}) over (
+        	partition by station_id
     	    order by ts asc
     	) - ts)  as minutes_bt_check,
     	lead(num_bikes_available, {{i}}) over (
+        	partition by station_id
     	    order by ts asc
     	) as bikes_available,
 	FROM
