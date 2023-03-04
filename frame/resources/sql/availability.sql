@@ -1,21 +1,23 @@
 SELECT
     station_id,
     hour,
-    dayofweek(make_timestamp(year, month, day, hour, minute, 0.0)) as dow,
+    dayofweek(make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0)) as dow,
     num_bikes_available,
     num_bikes_disabled,
     num_docks_available,
     num_docks_disabled,
     status,
-{% for i in list(range(1, 7)) + list(range(7, 18, 3)) %}
-    minute(lead(make_timestamp(year, month, day, hour, minute, 0.0), {i}) over (
+{% for i in range(1, 7) %}
+    (lead(num_bikes_available, {{i}}) over (
         partition by station_id
-        order by make_timestamp(year, month, day, hour, minute, 0.0) asc
-    ) - make_timestamp(year, month, day, hour, minute, 0.0)) as minutes_bt_check_{i},
-    (lead(num_bikes_available, {i}) over (
+        order by make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0) asc
+    ) > 0)::int as bikes_available_{{i}},
+{% endfor %}
+{% for i in range(7,18,3) %}
+    (lead(num_bikes_available, {{i}}) over (
         partition by station_id
-        order by make_timestamp(year, month, day, hour, minute, 0.0) asc
-    ) > 0)::int as bikes_available_{i},
+        order by make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0) asc
+    ) > 0)::int as bikes_available_{{i}} {% if not loop.last %},{% endif %}
 {% endfor %}
 FROM
     {{ parquet_partitioned_table('status') }}

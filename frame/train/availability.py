@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Tuple, Optional
 
+import pandas as pd
 from lightgbm import LGBMClassifier
 from sklearn.pipeline import make_pipeline
 from sklearn.compose import ColumnTransformer
@@ -43,6 +44,26 @@ AVAILABILITY_METRICS: Tuple[FrameMetric, ...] = (
 
 NEG_WEIGHT: int = 500
 POS_WEIGHT: int = 1
+
+
+def postprocess_dataset_availability(dataset: pd.DataFrame) -> pd.DataFrame:
+    dataset = dataset.drop(
+        columns=[c for c in dataset.columns if c.startswith("minutes_bt_check")]
+    )
+    dataset["id"] = dataset.index
+    dataset = (
+        pd.wide_to_long(
+            dataset,
+            stubnames="bikes_available",
+            i="id",
+            j="minutes_bt_check",
+            sep="_",
+            suffix=r"\d+",
+        )
+        .reset_index("minutes_bt_check")
+        .dropna()
+    )
+    return dataset
 
 
 def train_availability(
@@ -102,4 +123,5 @@ def train_availability(
         mlflow_tracking_uri=mlflow_tracking_uri,
         test_size=test_size,
         env=env,
+        dataset_transformations=[postprocess_dataset_availability],
     )

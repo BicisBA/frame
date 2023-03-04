@@ -2,7 +2,7 @@ import os
 import time
 import operator as ops
 from datetime import datetime, timedelta
-from typing import Tuple, Union, Callable, Optional
+from typing import List, Tuple, Union, Callable, Optional
 
 import duckdb
 import joblib
@@ -30,34 +30,6 @@ from frame.constants import (
 logger = get_logger(__name__)
 
 
-def postprocess_dataset_availability(dataset: pd.DataFrame) -> pd.DataFrame:
-    dfs_to_concat = []
-    for i in list(range(1, 7)) + list(range(7, 18, 3)):
-        dfs_to_concat.append(
-            dataset[
-                [
-                    "station_id",
-                    "hour",
-                    "dow",
-                    "num_bikes_available",
-                    "num_bikes_disabled",
-                    "num_docks_available",
-                    "num_docks_disabled",
-                    "status",
-                    f"minutes_bt_check_{i}",
-                    f"bikes_available_{i}",
-                ]
-            ].rename(
-                columns={
-                    f"minutes_bt_check_{i}": "minutes_bt_check",
-                    f"bikes_available_{i}": "bikes_available",
-                }
-            )
-        )
-
-    return pd.concat(dfs_to_concat).dropna().drop_duplicates()
-
-
 @with_env(
     MLFLOW_TRACKING_USERNAME=cfg.mlflow.username(),
     MLFLOW_TRACKING_PASSWORD=cfg.mlflow.password(),
@@ -76,6 +48,9 @@ def train_model(
     query: Optional[str] = None,
     env: Environments = CFG_ENV,
     experiment_suffix: Optional[str] = None,
+    dataset_transformations: Optional[
+        List[Callable[[pd.DataFrame], pd.DataFrame]]
+    ] = None,
     **query_kws,
 ):
     con = con if con is not None else connect()
@@ -86,8 +61,9 @@ def train_model(
     logger.info("Executing query")
     t0 = time.time()
     dataset = con.execute(rendered_query).df().dropna()
-    if model == FrameModels.AVAILABILITY:
-        dataset = postprocess_dataset_availability(dataset)
+    if dataset_transformations is not None:
+        for transformation in dataset_transformations:
+            dataset = transformation(dataset)
     t1 = time.time()
     query_time = t1 - t0
     logger.info("Query finished in %s", timedelta(seconds=query_time))
