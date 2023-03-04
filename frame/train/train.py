@@ -2,7 +2,7 @@ import os
 import time
 import operator as ops
 from datetime import datetime, timedelta
-from typing import Tuple, Union, Callable, Optional
+from typing import List, Tuple, Union, Callable, Optional
 
 import duckdb
 import joblib
@@ -30,9 +30,11 @@ from frame.constants import (
 logger = get_logger(__name__)
 
 
-def postprocess_dataset_availability(dataset: pd.DataFrame) -> pd.DataFrame:
+def postprocess_dataset_availability(
+    dataset: pd.DataFrame, minutes_to_eval: List[int]
+) -> pd.DataFrame:
     dfs_to_concat = []
-    for i in list(range(1, 7)) + list(range(7, 18, 3)):
+    for i in minutes_to_eval:
         dfs_to_concat.append(
             dataset[
                 [
@@ -87,7 +89,9 @@ def train_model(
     t0 = time.time()
     dataset = con.execute(rendered_query).df().dropna()
     if model == FrameModels.AVAILABILITY:
-        dataset = postprocess_dataset_availability(dataset)
+        dataset = postprocess_dataset_availability(
+            dataset, query_kws["minutes_to_eval"]
+        )
     t1 = time.time()
     query_time = t1 - t0
     logger.info("Query finished in %s", timedelta(seconds=query_time))

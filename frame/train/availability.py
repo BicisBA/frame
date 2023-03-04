@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Tuple, Optional
+from typing import List, Tuple, Optional
 
 from lightgbm import LGBMClassifier
 from sklearn.pipeline import make_pipeline
@@ -44,6 +44,8 @@ AVAILABILITY_METRICS: Tuple[FrameMetric, ...] = (
 NEG_WEIGHT: int = 500
 POS_WEIGHT: int = 1
 
+DEFAULT_MINUTES_TO_EVAL: List[int] = list(range(1, 7)) + list(range(7, 18, 3))
+
 
 def train_availability(
     start_date: datetime,
@@ -58,6 +60,7 @@ def train_availability(
     neg_weight: Optional[int] = NEG_WEIGHT,
     pos_weight: Optional[int] = POS_WEIGHT,
     env: Environments = CFG_ENV,
+    minutes_to_eval: List[int] = DEFAULT_MINUTES_TO_EVAL,
 ):
 
     pipeline = make_pipeline(
@@ -102,4 +105,5 @@ def train_availability(
         mlflow_tracking_uri=mlflow_tracking_uri,
         test_size=test_size,
         env=env,
+        minutes_to_eval=minutes_to_eval,
     )
