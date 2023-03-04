@@ -47,21 +47,18 @@ POS_WEIGHT: int = 1
 
 
 def postprocess_dataset_availability(dataset: pd.DataFrame) -> pd.DataFrame:
-    dataset = dataset.drop(
-        columns=[c for c in dataset.columns if c.startswith("minutes_bt_check")]
-    )
     dataset["id"] = dataset.index
     dataset = (
         pd.wide_to_long(
             dataset,
-            stubnames="bikes_available",
+            stubnames=["bikes_available", "minutes_bt_check"],
             i="id",
-            j="minutes_bt_check",
+            j="temp_j",
             sep="_",
             suffix=r"\d+",
         )
-        .reset_index("minutes_bt_check")
         .dropna()
+        .reset_index(drop=True)
     )
     return dataset
 
