@@ -11,7 +11,7 @@ from frame.train.eta import (
     ETA_METRICS,
     ETA_CAT_FEATURES,
     ETA_NUM_FEATURES,
-    PARTITION_COLUMN,
+    PARTITION_COLUMN as ETA_PARTITION_COLUMN,
     train_eta,
 )
 from frame.train.availability import (
@@ -40,7 +40,7 @@ def eta(
     metrics: List[FrameMetric] = ETA_METRICS,
     mlflow_tracking_uri: str = cfg.mlflow.uri(),
     test_size: float = typer.Option(DEFAULT_TEST_SIZE, min=0.0, max=1.0),
-    partition_column: str = PARTITION_COLUMN,
+    partition_column: str = ETA_PARTITION_COLUMN,
     env: Environments = CFG_ENV,
 ):
     train_eta(

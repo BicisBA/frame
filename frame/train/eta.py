@@ -84,5 +84,6 @@ def train_eta(
         end_date=end_date,
         mlflow_tracking_uri=mlflow_tracking_uri,
         test_size=test_size,
+        stratify=partition_column,
         env=env,
     )
