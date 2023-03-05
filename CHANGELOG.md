@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.5.0] - 2023-03-04
 ### Fixed
 - Availability and ETA queries were mission partition on
+- Skip training for stations with only one class
+- Optimized dtypes for queries
 
 ### Added
 - Allow for arbitrary code post processing to queries results on training
