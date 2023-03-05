@@ -5,11 +5,12 @@ import pandas as pd
 from lightgbm import LGBMRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 from frame.utils import get_logger
 from frame.train.train import train_model
 from frame.config import cfg, env as CFG_ENV
+from frame.train.transformers import DtypeFixer
 from frame.train.metaestimator import PartitionedMetaEstimator
 from frame.constants import (
     METRICS_MAPPING,
@@ -81,10 +82,8 @@ def train_eta(
         ColumnTransformer(
             [
                 (
-                    "ohe",
-                    OneHotEncoder(
-                        handle_unknown="infrequent_if_exist", sparse_output=False
-                    ),
+                    "dtype_fixer",
+                    DtypeFixer(dtype="category"),
                     [*cat_features],
                 ),
                 (
