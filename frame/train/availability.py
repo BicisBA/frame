@@ -122,7 +122,6 @@ def train_availability(
         end_date=end_date,
         mlflow_tracking_uri=mlflow_tracking_uri,
         test_size=test_size,
-        stratify=partition_column,
         env=env,
         dataset_transformations=[postprocess_dataset_availability],
         minutes_to_eval=minutes_to_eval,

@@ -44,7 +44,6 @@ def train_model(
     mlflow_tracking_uri=cfg.mlflow.uri(),
     con: Optional[duckdb.DuckDBPyConnection] = None,
     test_size: float = DEFAULT_TEST_SIZE,
-    stratify: Optional[str] = None,
     metrics: Optional[Tuple[Callable]] = None,
     query: Optional[str] = None,
     env: Environments = CFG_ENV,
@@ -104,7 +103,6 @@ def train_model(
             dataset.drop(columns=[target]),
             dataset[target],
             test_size=test_size,
-            stratify=stratify,
             shuffle=True,
         )
 
