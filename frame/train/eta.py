@@ -95,7 +95,7 @@ def train_eta(
             ],
             verbose_feature_names_out=False,
         ),
-        PartitionedMetaEstimator(LGBMRegressor(), partition_column),
+        PartitionedMetaEstimator(LGBMRegressor(n_estimators=20), partition_column),
     )
     pipeline.set_output(transform="pandas")
 

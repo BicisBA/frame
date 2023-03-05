@@ -104,7 +104,7 @@ def train_availability(
         PartitionedMetaEstimator(
             LGBMClassifier(
                 class_weight={0: neg_weight or 1, 1: pos_weight or 1},
-                n_estimators=10,
+                n_estimators=20,
                 max_depth=6,
             ),
             partition_column,
