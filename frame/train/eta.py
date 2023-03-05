@@ -68,7 +68,7 @@ def train_eta(
             verbose_feature_names_out=False,
         ),
         PartitionedMetaEstimator(
-            MLPRegressor((128, 128, 128), max_iter=200), partition_column
+            MLPRegressor((128, 128, 128), max_iter=20), partition_column
         ),
     )
     pipeline.set_output(transform="pandas")

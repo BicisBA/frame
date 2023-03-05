@@ -103,12 +103,14 @@ def train_model(
         mlflow.log_param("cat_features", cat_features)
         mlflow.log_param("query_bindings", query_kws)
 
+        logger.info("Splitting dataset")
         X_train, X_test, y_train, y_test = train_test_split(
             dataset.drop(columns=[target]),
             dataset[target],
             test_size=test_size,
-            shuffle=True,
+            shuffle=False,
         )
+        del dataset
 
         logger.info("Fitting estimator")
         estimator.fit(X_train, y_train)
