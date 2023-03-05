@@ -12,6 +12,7 @@ from frame.train.eta import (
     ETA_CAT_FEATURES,
     ETA_NUM_FEATURES,
     PARTITION_COLUMN as ETA_PARTITION_COLUMN,
+    DEFAULT_MINUTES_TO_EVAL_ETA,
     train_eta,
 )
 from frame.train.availability import (
@@ -43,6 +44,7 @@ def eta(
     test_size: float = typer.Option(DEFAULT_TEST_SIZE, min=0.0, max=1.0),
     partition_column: str = ETA_PARTITION_COLUMN,
     env: Environments = CFG_ENV,
+    minutes_to_eval: List[int] = DEFAULT_MINUTES_TO_EVAL_ETA,
 ):
     train_eta(
         start_date=start_date,
@@ -55,6 +57,7 @@ def eta(
         test_size=test_size,
         partition_column=partition_column,
         env=env,
+        minutes_to_eval=minutes_to_eval,
     )
 
 

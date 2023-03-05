@@ -1,9 +1,10 @@
 from datetime import datetime
-from typing import Tuple, Optional
+from typing import List, Tuple, Optional
 
+import pandas as pd
+from lightgbm import LGBMRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.compose import ColumnTransformer
-from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from frame.utils import get_logger
@@ -34,6 +35,33 @@ PARTITION_COLUMN: str = "station_id"
 ETA_TARGET: str = "minutes_bt_check"
 ETA_METRICS: Tuple[FrameMetric, ...] = (FrameMetric.MAE,)
 
+DEFAULT_MINUTES_TO_EVAL_ETA: List[int] = list(range(1, 7)) + list(range(7, 18, 3))
+
+
+def postprocess_dataset_eta(dataset: pd.DataFrame) -> pd.DataFrame:
+    dataset["id"] = dataset.index
+    dataset = (
+        pd.wide_to_long(
+            dataset,
+            stubnames=["remaining_bikes_available", "minutes_bt_check"],
+            i="id",
+            j="temp_j",
+            sep="_",
+            suffix=r"\d+",
+        )
+        .dropna()
+        .reset_index(drop=True)
+    )
+    dataset["remaining_bikes_available"] = dataset["remaining_bikes_available"].astype(
+        "uint8"
+    )
+    dataset["minutes_bt_check"] = dataset["minutes_bt_check"].astype("uint8")
+    dataset = dataset[
+        (dataset["remaining_bikes_available"] > dataset["num_bikes_available"])
+        & (dataset["num_bikes_available"] <= 2)
+    ]
+    return dataset
+
 
 def train_eta(
     start_date: datetime,
@@ -46,6 +74,7 @@ def train_eta(
     test_size: float = DEFAULT_TEST_SIZE,
     partition_column: str = PARTITION_COLUMN,
     env: Environments = CFG_ENV,
+    minutes_to_eval: List[int] = DEFAULT_MINUTES_TO_EVAL_ETA,
 ):
 
     pipeline = make_pipeline(
@@ -67,9 +96,7 @@ def train_eta(
             ],
             verbose_feature_names_out=False,
         ),
-        PartitionedMetaEstimator(
-            MLPRegressor((128, 128, 128), max_iter=20), partition_column
-        ),
+        PartitionedMetaEstimator(LGBMRegressor(), partition_column),
     )
     pipeline.set_output(transform="pandas")
 
@@ -85,4 +112,6 @@ def train_eta(
         mlflow_tracking_uri=mlflow_tracking_uri,
         test_size=test_size,
         env=env,
+        dataset_transformations=[postprocess_dataset_eta],
+        minutes_to_eval=minutes_to_eval,
     )
