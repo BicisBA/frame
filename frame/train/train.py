@@ -60,10 +60,14 @@ def train_model(
 
     logger.info("Executing query")
     t0 = time.time()
-    dataset = con.execute(rendered_query).df().dropna()
+    dataset = con.execute(rendered_query).df()
+
     if dataset_transformations is not None:
         for transformation in dataset_transformations:
             dataset = transformation(dataset)
+
+    dataset = dataset.dropna()
+
     t1 = time.time()
     query_time = t1 - t0
     logger.info("Query finished in %s", timedelta(seconds=query_time))
