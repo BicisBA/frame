@@ -43,14 +43,18 @@ status_by_minute AS (
 	{% endfor %}
 )
 SELECT station_id,
-	hour::int hod,
-    dow,
-    num_bikes_disabled,
-    num_docks_available,
-    num_docks_disabled,
-    minutes_bt_check
+	hour::utinyint hod,
+    dow::utinyint as dow,
+    num_bikes_disabled::utinyint as num_bikes_disabled,
+    num_docks_available::utinyint as num_docks_available,
+    num_docks_disabled::utinyint as num_docks_disabled,
+    minutes_bt_check::utinyint as minutes_bt_check
 FROM status_by_minute
-WHERE (num_bikes_available = 0
-AND bikes_available > 0)
-OR (bikes_available > num_bikes_available
-AND num_bikes_available <= 2)
+WHERE (
+	num_bikes_available = 0
+	AND bikes_available > 0
+)
+OR (
+	bikes_available > num_bikes_available
+	AND num_bikes_available <= 2
+)

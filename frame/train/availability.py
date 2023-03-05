@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Iterable, Optional
 
 import pandas as pd
 from lightgbm import LGBMClassifier
@@ -46,6 +46,21 @@ NEG_WEIGHT: int = 500
 POS_WEIGHT: int = 1
 
 DEFAULT_MINUTES_TO_EVAL: List[int] = list(range(1, 7)) + list(range(7, 18, 3))
+
+
+def fix_types(
+    dataset: pd.DataFrame,
+    colnames: Iterable[Tuple[str, str]] = (
+        ("minutes_bt_check_", "uint8"),
+        ("bikes_available_", "uint8"),
+    ),
+) -> pd.DataFrame:
+    for col in dataset.columns:
+        for colname, coltype in colnames:
+            if col.startswith(colname):
+                dataset[col] = dataset[col].astype(coltype)
+                break
+    return dataset
 
 
 def postprocess_dataset_availability(dataset: pd.DataFrame) -> pd.DataFrame:
@@ -123,6 +138,6 @@ def train_availability(
         mlflow_tracking_uri=mlflow_tracking_uri,
         test_size=test_size,
         env=env,
-        dataset_transformations=[postprocess_dataset_availability],
+        dataset_transformations=[fix_types, postprocess_dataset_availability],
         minutes_to_eval=minutes_to_eval,
     )
