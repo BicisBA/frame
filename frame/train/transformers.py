@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin, OneToOneFeatureMixin
 
 
-class CategoryDtypeFixer(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
+class DtypeFixer(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
     def __init__(self, dtype: str):
         self.dtype = dtype
 
