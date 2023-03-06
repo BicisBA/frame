@@ -70,11 +70,21 @@ class MLFlowPredictor:
                 logger.info("Already at latest model for %s", self.model)
                 return
 
-            self.model_version = latest.version
+            logger.info(
+                "Current loaded version is %s, but latest is %s. Downloading from run_id %s",
+                self.model_version,
+                latest.version,
+                latest.run_id,
+            )
+
             latest_path = mlflow.artifacts.download_artifacts(
                 artifact_path=f"{self.model}.joblib", run_id=latest.run_id
             )
+
+            logger.info("Reloading from %s", latest_path)
             self.pipeline = joblib.load(latest_path)
+
+            self.model_version = latest.version
 
             os.remove(latest_path)
         except mlflow.exceptions.MlflowException:
