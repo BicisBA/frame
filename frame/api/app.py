@@ -3,6 +3,7 @@ from fastapi_utils.tasks import repeat_every
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
+from frame.config import cfg
 from frame import __version__
 from frame.utils import get_logger
 from frame.models.base import SessionLocal
@@ -30,7 +31,11 @@ app.include_router(stations_router)
 
 
 @app.on_event("startup")
-@repeat_every(seconds=21600, max_repetitions=None, logger=logger)
+@repeat_every(
+    seconds=cfg.api.refresh_stations_info(default=21600, cast=int),
+    max_repetitions=None,
+    logger=logger,
+)
 def refresh_stations_info() -> None:
     logger.info("Refreshing stations info")
     db = SessionLocal()
@@ -39,7 +44,11 @@ def refresh_stations_info() -> None:
 
 
 @app.on_event("startup")
-@repeat_every(seconds=30, max_repetitions=None, logger=logger)
+@repeat_every(
+    seconds=cfg.api.refresh_stations_status(default=30, cast=int),
+    max_repetitions=None,
+    logger=logger,
+)
 def refresh_stations_status() -> None:
     logger.info("Refreshing stations status")
     db = SessionLocal()
@@ -48,9 +57,8 @@ def refresh_stations_status() -> None:
 
 
 @app.on_event("startup")
-@repeat_every(seconds=3600, max_repetitions=None, logger=logger)
 @repeat_every(
-    seconds=MODEL_RELOAD_SECONDS,
+    seconds=cfg.models.reload(default=MODEL_RELOAD_SECONDS, cast=int),
     max_repetitions=None,
     logger=logger,
 )
