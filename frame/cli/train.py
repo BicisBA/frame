@@ -11,7 +11,8 @@ from frame.train.eta import (
     ETA_METRICS,
     ETA_CAT_FEATURES,
     ETA_NUM_FEATURES,
-    PARTITION_COLUMN,
+    PARTITION_COLUMN as ETA_PARTITION_COLUMN,
+    DEFAULT_MINUTES_TO_EVAL_ETA,
     train_eta,
 )
 from frame.train.availability import (
@@ -19,6 +20,7 @@ from frame.train.availability import (
     POS_WEIGHT as AVAILABILITY_POS_WEIGHT,
     AVAILABILITY_TARGET,
     AVAILABILITY_METRICS,
+    DEFAULT_MINUTES_TO_EVAL,
     AVAILABILITY_CAT_FEATURES,
     AVAILABILITY_NUM_FEATURES,
     AVAILABILITY_PARTITION_COLUMN,
@@ -40,8 +42,9 @@ def eta(
     metrics: List[FrameMetric] = ETA_METRICS,
     mlflow_tracking_uri: str = cfg.mlflow.uri(),
     test_size: float = typer.Option(DEFAULT_TEST_SIZE, min=0.0, max=1.0),
-    partition_column: str = PARTITION_COLUMN,
+    partition_column: str = ETA_PARTITION_COLUMN,
     env: Environments = CFG_ENV,
+    minutes_to_eval: List[int] = DEFAULT_MINUTES_TO_EVAL_ETA,
 ):
     train_eta(
         start_date=start_date,
@@ -54,6 +57,7 @@ def eta(
         test_size=test_size,
         partition_column=partition_column,
         env=env,
+        minutes_to_eval=minutes_to_eval,
     )
 
 
@@ -71,6 +75,7 @@ def availability(
     neg_weight: int = AVAILABILITY_NEG_WEIGHT,
     pos_weight: int = AVAILABILITY_POS_WEIGHT,
     env: Environments = CFG_ENV,
+    minutes_to_eval: List[int] = DEFAULT_MINUTES_TO_EVAL,
 ):
     train_availability(
         start_date=start_date,
@@ -85,4 +90,5 @@ def availability(
         neg_weight=neg_weight,
         pos_weight=pos_weight,
         env=env,
+        minutes_to_eval=minutes_to_eval,
     )

@@ -28,6 +28,9 @@ class PartitionedMetaEstimator(BaseEstimator, RegressorMixin):
         logger.info("Fit stations estimators")
         for val in tqdm(X[self.partition_column].unique(), desc="Fitting"):
             mask = X[self.partition_column] == val
+            if y[mask].nunique() == 1:
+                logger.info("Skipping station %s as it has only one value", val)
+                continue
 
             self.regressors[val] = clone(self.regressor)
             self.regressors[val].fit(X[mask], y[mask])

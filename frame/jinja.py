@@ -81,13 +81,10 @@ def render_sql_query(sql: str, **query_context_params) -> str:
     sql : str
         Formatted query.
     """
-    jinja_logging_undef = jinja2.make_logging_undefined(
-        logger=logger, base=jinja2.Undefined
-    )
     env = jinja2.Environment(
         trim_blocks=True,
         lstrip_blocks=True,
-        undefined=jinja_logging_undef,
+        undefined=jinja2.StrictUndefined,
         autoescape=True,
     )
     env.filters["wrap"] = wrap

@@ -1,13 +1,27 @@
-WITH base_status AS (
 SELECT
     station_id,
-    hour,
-    num_bikes_available,
-    num_bikes_disabled,
-    num_docks_available,
-    num_docks_disabled,
-    status,
-    make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0) as ts,
+    hour::utinyint as hod,
+    dayofweek(make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0))::utinyint as dow,
+    num_bikes_available::utinyint as num_bikes_available,
+    num_bikes_disabled::utinyint as num_bikes_disabled,
+    num_docks_available::utinyint as num_docks_available,
+    num_docks_disabled::utinyint as num_docks_disabled,
+    {% for i in minutes_to_eval %}
+    minute(
+		lead(
+			make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0),
+			{{i}}
+		) over (
+        	partition by station_id
+        	order by make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0)
+			asc
+    	) - make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0)
+	) as minutes_bt_check_{{i}},
+    lead(num_bikes_available, {{i}}) over (
+        partition by station_id
+        order by make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0) asc
+    ) > 0 as bikes_available_{{i}},
+    {% endfor %}
 FROM
     {{ parquet_partitioned_table('status') }}
 WHERE
@@ -16,25 +30,3 @@ WHERE
 	    AND station_id = {{station_id}}
 	{% endif %}
 	AND {{ filter_daterange(start_date, end_date) }}
-)
-{% for i in range(1,17, 3) %}
-    {% if not loop.first %}
-UNION
-    {% endif %}
-SELECT
-    station_id,
-    hour::int hod,
-    dayofweek(ts) as dow,
-    num_bikes_available,
-    num_bikes_disabled,
-    num_docks_available,
-    num_docks_disabled,
-    minute(lead(ts, {{i}}) over (
-        order by ts asc
-    ) - ts)  as minutes_bt_check,
-    (lead(num_bikes_available, {{i}}) over (
-        order by ts asc
-    ) > 0)::int as bikes_available,
-FROM
-    base_status
-{% endfor %}

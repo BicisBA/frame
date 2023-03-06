@@ -2,11 +2,12 @@ import os
 import time
 import operator as ops
 from datetime import datetime, timedelta
-from typing import Tuple, Union, Callable, Optional
+from typing import List, Tuple, Union, Callable, Optional
 
 import duckdb
 import joblib
 import mlflow
+import pandas as pd
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator
 from mlflow.tracking import MlflowClient
@@ -47,6 +48,9 @@ def train_model(
     query: Optional[str] = None,
     env: Environments = CFG_ENV,
     experiment_suffix: Optional[str] = None,
+    dataset_transformations: Optional[
+        List[Callable[[pd.DataFrame], pd.DataFrame]]
+    ] = None,
     **query_kws,
 ):
     con = con if con is not None else connect()
@@ -56,7 +60,14 @@ def train_model(
 
     logger.info("Executing query")
     t0 = time.time()
-    dataset = con.execute(rendered_query).df().dropna()
+    dataset = con.execute(rendered_query).df()
+
+    if dataset_transformations is not None:
+        for transformation in dataset_transformations:
+            dataset = transformation(dataset)
+
+    dataset = dataset.dropna()
+
     t1 = time.time()
     query_time = t1 - t0
     logger.info("Query finished in %s", timedelta(seconds=query_time))
@@ -92,12 +103,14 @@ def train_model(
         mlflow.log_param("cat_features", cat_features)
         mlflow.log_param("query_bindings", query_kws)
 
+        logger.info("Splitting dataset")
         X_train, X_test, y_train, y_test = train_test_split(
             dataset.drop(columns=[target]),
             dataset[target],
             test_size=test_size,
             shuffle=False,
         )
+        del dataset
 
         logger.info("Fitting estimator")
         estimator.fit(X_train, y_train)
