@@ -14,7 +14,7 @@ from sqlalchemy import (
     CheckConstraint,
 )
 
-from frame.models.base import Base, UpdatableBase
+from frame.models.base import Base, PrintableBase, UpdatableBase
 
 
 class Station(Base, UpdatableBase):
@@ -44,7 +44,7 @@ class StationStatus(Base, UpdatableBase):
     last_reported = Column(Integer, nullable=True)
 
 
-class Prediction(Base):
+class Prediction(Base, UpdatableBase, PrintableBase):
     """Prediction made for an user."""
 
     __tablename__ = "predictions"

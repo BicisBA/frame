@@ -63,7 +63,7 @@ def update_stations_status(db: Session) -> None:
 
     for station_status in stations_status:
         if station_status["status"] == "END_OF_LIFE":
-            logger.info("Skipping %s, since it's marked as EOL", station_status)
+            logger.warning("Skipping %s, since it's marked as EOL", station_status)
             continue
 
         if (
@@ -72,7 +72,7 @@ def update_stations_status(db: Session) -> None:
             .first()
             is None
         ):
-            logger.info(
+            logger.warning(
                 "Skipping %s, since there's no info for such station", station_status
             )
             continue
@@ -179,6 +179,7 @@ def predict(
         eta_features=eta_features,
         availability_features=availability_features,
     )
+    logger.debug("Prediction made: %s", new_prediction)
     db.add(new_prediction)
     db.commit()
     return new_prediction
