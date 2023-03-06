@@ -103,6 +103,13 @@ def train_model(
         mlflow.log_param("cat_features", cat_features)
         mlflow.log_param("query_bindings", query_kws)
 
+        if isinstance(estimator, Pipeline):
+            _reg = estimator[-1]
+        else:
+            _reg = estimator
+
+        mlflow.log_params(_reg.get_params())
+
         logger.info("Splitting dataset")
         X_train, X_test, y_train, y_test = train_test_split(
             dataset.drop(columns=[target]),
