@@ -6,19 +6,29 @@ SELECT
     num_docks_disabled::utinyint as num_docks_disabled,
     hour::int as hod,
     dayofweek(make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0))::utinyint as dow,
-    date_diff(
-        'minute',
-        make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0),
-        MIN(CASE WHEN num_bikes_available > prev_num_bikes_available THEN make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0) END) OVER (
-            PARTITION BY station_id ORDER BY make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0)
-            ROWS BETWEEN 1 FOLLOWING AND UNBOUNDED FOLLOWING
-        )
-    ) AS minutes_until_next_bike_arrival
+    LEAST(
+		date_diff(
+        	'minute',
+        	make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0),
+        	MIN(
+				CASE
+					WHEN num_bikes_available > prev_num_bikes_available
+					THEN make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0)
+				END
+			) OVER (
+            	PARTITION BY station_id
+				ORDER BY make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0)
+            	ROWS BETWEEN 1 FOLLOWING AND UNBOUNDED FOLLOWING
+        	)
+    	),
+		60
+	) AS minutes_until_next_bike_arrival
 FROM (
     SELECT
         *,
         LAG(num_bikes_available) OVER (
-            PARTITION BY station_id ORDER BY last_reported, year, month, day, hour, minute
+            PARTITION BY station_id
+			ORDER BY make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0) ASC
         ) AS prev_num_bikes_available
     FROM {{ parquet_partitioned_table('status') }}
     WHERE status = 'IN_SERVICE'

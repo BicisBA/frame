@@ -23,6 +23,7 @@ logger = get_logger(__name__)
 
 
 ETA_NUM_FEATURES: Tuple[str, ...] = (
+    "num_bikes_available",
     "num_bikes_disabled",
     "num_docks_available",
     "num_docks_disabled",
@@ -66,7 +67,9 @@ def train_eta(
             ],
             verbose_feature_names_out=False,
         ),
-        PartitionedMetaEstimator(LGBMRegressor(n_estimators=20), partition_column),
+        PartitionedMetaEstimator(
+            LGBMRegressor(n_estimators=50, objective="regression_l1"), partition_column
+        ),
     )
     pipeline.set_output(transform="pandas")
 
