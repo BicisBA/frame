@@ -3,6 +3,7 @@
 
 from sqlalchemy.sql import func
 from sqlalchemy import (
+    JSON,
     Float,
     Column,
     String,
@@ -51,8 +52,10 @@ class Prediction(Base):
     station_id = Column(Integer, ForeignKey("stations.station_id"))
     bike_availability_probability = Column(Float, nullable=False)
     availability_model_version = Column(Integer, nullable=True)
+    availability_features = Column(JSON, nullable=True)
     bike_eta = Column(Float, nullable=False)
     eta_model_version = Column(Integer, nullable=True)
+    eta_features = Column(JSON, nullable=True)
     user_eta = Column(Float, nullable=False)
     user_lat = Column(Numeric, nullable=False)
     user_lon = Column(Numeric, nullable=False)

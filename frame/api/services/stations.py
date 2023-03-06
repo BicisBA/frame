@@ -136,29 +136,32 @@ def predict(
     station_status = get_station_status(station_id, db)
 
     try:
-        bike_eta = eta_predictor.predict(
-            station_id=station_id,
-            hod=current_time.hour,
-            # Sunday = 0 -> Saturday = 6
-            dow=(current_time.weekday() + 1) % 7,
-            num_bikes_disabled=station_status.num_bikes_disabled,
-            num_docks_available=station_status.num_docks_available,
-            num_docks_disabled=station_status.num_docks_disabled,
-        )
+        eta_features = {
+            "station_id": station_id,
+            "hod": current_time.hour,
+            "dow": (current_time.weekday() + 1) % 7,
+            "num_bikes_disabled": station_status.num_bikes_disabled,
+            "num_docks_available": station_status.num_docks_available,
+            "num_docks_disabled": station_status.num_docks_disabled,
+        }
+        bike_eta = eta_predictor.predict(**eta_features)
     except UninitializedPredictor:
         logger.exception("Error predicting ETA")
         raise PredictionError("Uninitialized ETA predictor")
 
     try:
+        availability_features = {
+            "station_id": station_id,
+            "hod": current_time.hour,
+            "dow": (current_time.weekday() + 1) % 7,
+            "num_bikes_available": station_status.num_bikes_available,
+            "num_bikes_disabled": station_status.num_bikes_disabled,
+            "num_docks_available": station_status.num_docks_available,
+            "num_docks_disabled": station_status.num_docks_disabled,
+            "minutes_bt_check": prediction_params.user_eta,
+        }
         availability_probability = availability_predictor.predict(
-            station_id=station_id,
-            hod=current_time.hour,
-            dow=(current_time.weekday() + 1) % 7,
-            num_bikes_available=station_status.num_bikes_available,
-            num_bikes_disabled=station_status.num_bikes_disabled,
-            num_docks_available=station_status.num_docks_available,
-            num_docks_disabled=station_status.num_docks_disabled,
-            minutes_bt_check=prediction_params.user_eta,
+            **availability_features
         )
     except UninitializedPredictor:
         logger.exception("Error predicting availability")
@@ -173,6 +176,8 @@ def predict(
         user_lon=prediction_params.user_lon,
         eta_model_version=eta_predictor.model_version,
         availability_model_version=availability_predictor.model_version,
+        eta_features=eta_features,
+        availability_features=availability_features,
     )
     db.add(new_prediction)
     db.commit()
