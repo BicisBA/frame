@@ -46,7 +46,9 @@ AVAILABILITY_METRICS: Tuple[FrameMetric, ...] = (
 NEG_WEIGHT: int = 500
 POS_WEIGHT: int = 1
 
-DEFAULT_MINUTES_TO_EVAL: List[int] = list(range(1, 7)) + list(range(7, 18, 3))
+DEFAULT_MINUTES_TO_EVAL_AVAILABILITY: List[int] = list(range(1, 7)) + list(
+    range(7, 18, 3)
+)
 
 
 def postprocess_dataset_availability(dataset: pd.DataFrame) -> pd.DataFrame:
@@ -81,7 +83,7 @@ def train_availability(
     neg_weight: Optional[int] = NEG_WEIGHT,
     pos_weight: Optional[int] = POS_WEIGHT,
     env: Environments = CFG_ENV,
-    minutes_to_eval: List[int] = DEFAULT_MINUTES_TO_EVAL,
+    minutes_to_eval: List[int] = DEFAULT_MINUTES_TO_EVAL_AVAILABILITY,
 ):
 
     pipeline = make_pipeline(
