@@ -139,8 +139,9 @@ def train_model(
         mlflow.log_artifact(estimator_path)
 
         if env == Environments.PROD:
+            artifact_uri = mlflow.get_artifact_uri(estimator_path)
             new_version = mlflow_client.create_model_version(
-                model, estimator_path, run.info.run_id
+                model, artifact_uri, run.info.run_id
             )
             mlflow_client.transition_model_version_stage(
                 model, new_version.version, MLFlowStage.Production.value
