@@ -34,7 +34,7 @@ ETA_CAT_FEATURES: Tuple[str, ...] = ("hod", "dow")
 PARTITION_COLUMN: str = "station_id"
 
 ETA_TARGET: str = "minutes_until_next_bike_arrival"
-ETA_METRICS: Tuple[FrameMetric, ...] = (FrameMetric.MAE,)
+ETA_METRICS: Tuple[FrameMetric, ...] = (FrameMetric.MAE, FrameMetric.MAPE)
 
 
 def train_eta(
