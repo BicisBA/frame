@@ -1,7 +1,12 @@
+import youconfigme as ycm
 from fastapi import FastAPI
+from redis import asyncio as aioredis
+from fastapi_cache import FastAPICache
 from fastapi_utils.tasks import repeat_every
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi_cache.backends.redis import RedisBackend
+from fastapi_cache.backends.inmemory import InMemoryBackend
 
 from frame.config import cfg
 from frame import __version__
@@ -69,3 +74,15 @@ def refresh_models() -> None:
     logger.info("Reloading availability model")
     AvailabilityPredictor.reload()
     logger.info("Models reloaded")
+
+
+@app.on_event("startup")
+async def set_redis_cache():
+    try:
+        redis_url = cfg.redis.url()
+        logger.info("Setting cache on redis %s", redis_url)
+        redis = aioredis.from_url(redis_url, encoding="utf8", decode_responses=True)
+        FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache-frame")
+    except ycm.ConfigItemNotFound:
+        logger.info("Setting cache in memory")
+        FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache-frame")
