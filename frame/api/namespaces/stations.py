@@ -1,6 +1,7 @@
 from typing import List
 
 from sqlalchemy.orm import Session
+from fastapi_cache.decorator import cache
 from fastapi import Depends, APIRouter, HTTPException
 
 from frame.utils import get_logger
@@ -23,16 +24,19 @@ router = APIRouter(
 
 
 @router.get("", response_model=List[station_schemas.Station])
+@cache(expire=300)
 def get_stations(db: Session = Depends(get_db)):
     return station_service.get_stations(db)
 
 
 @router.get("/status", response_model=List[station_schemas.StationStatus])
+@cache(expire=10)
 def get_stations_status(db: Session = Depends(get_db)):
     return station_service.get_stations_status(db)
 
 
 @router.get("/{station_id}", response_model=station_schemas.Station)
+@cache(expire=300)
 def get_station(station_id: int, db: Session = Depends(get_db)):
     try:
         return station_service.get_station(station_id, db)
@@ -41,6 +45,7 @@ def get_station(station_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/{station_id}/status", response_model=station_schemas.StationStatus)
+@cache(expire=10)
 def get_station_status(station_id: int, db: Session = Depends(get_db)):
     try:
         return station_service.get_station_status(station_id, db)
