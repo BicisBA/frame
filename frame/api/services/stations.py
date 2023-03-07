@@ -140,6 +140,7 @@ def predict(
             "station_id": station_id,
             "hod": current_time.hour,
             "dow": (current_time.weekday() + 1) % 7,
+            "num_bikes_available": station_status.num_bikes_available,
             "num_bikes_disabled": station_status.num_bikes_disabled,
             "num_docks_available": station_status.num_docks_available,
             "num_docks_disabled": station_status.num_docks_disabled,
