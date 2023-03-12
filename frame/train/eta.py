@@ -1,3 +1,4 @@
+import operator as ops
 from datetime import datetime
 from typing import Tuple, Optional
 
@@ -8,6 +9,7 @@ from sklearn.preprocessing import StandardScaler
 
 from frame.utils import get_logger
 from frame.train.train import train_model
+from frame.train.enrich import add_holidays
 from frame.config import cfg, env as CFG_ENV
 from frame.train.transformers import DtypeFixer
 from frame.train.metaestimator import PartitionedMetaEstimator
@@ -29,7 +31,7 @@ ETA_NUM_FEATURES: Tuple[str, ...] = (
     "num_docks_disabled",
 )
 
-ETA_CAT_FEATURES: Tuple[str, ...] = ("hod", "dow")
+ETA_CAT_FEATURES: Tuple[str, ...] = ("hod", "dow", "is_holiday")
 
 PARTITION_COLUMN: str = "station_id"
 
@@ -85,4 +87,6 @@ def train_eta(
         mlflow_tracking_uri=mlflow_tracking_uri,
         test_size=test_size,
         env=env,
+        dataset_transformations=[add_holidays],
+        feature_importance_extractor=ops.attrgetter("feature_importance"),
     )

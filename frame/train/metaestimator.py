@@ -1,3 +1,4 @@
+import operator as ops
 from typing import Dict, Union
 
 import numpy as np
@@ -35,6 +36,10 @@ class PartitionedMetaEstimator(BaseEstimator, RegressorMixin):
             self.regressors[val] = clone(self.regressor)
             self.regressors[val].fit(X[mask], y[mask])
 
+    @property
+    def fallback_estimator(self):
+        return self.regressors[FALLBACK_KEY]
+
     def predict(self, X):
         preds = np.empty(len(X))
 
@@ -70,3 +75,15 @@ class PartitionedMetaEstimator(BaseEstimator, RegressorMixin):
             ]
 
         return preds
+
+    @property
+    def feature_importance(self):
+        return dict(
+            sorted(
+                zip(
+                    self.fallback_estimator.feature_name_,
+                    self.fallback_estimator.feature_importances_.tolist(),
+                ),
+                key=ops.itemgetter(1),
+            )
+        )

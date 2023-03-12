@@ -1,8 +1,10 @@
 import os
+import json
 import time
+import tempfile
 import operator as ops
 from datetime import datetime, timedelta
-from typing import List, Tuple, Union, Callable, Optional
+from typing import Dict, List, Tuple, Union, Callable, Optional
 
 import duckdb
 import joblib
@@ -48,6 +50,9 @@ def train_model(
     query: Optional[str] = None,
     env: Environments = CFG_ENV,
     experiment_suffix: Optional[str] = None,
+    feature_importance_extractor: Optional[
+        Callable[[BaseEstimator], Dict[str, float]]
+    ] = None,
     dataset_transformations: Optional[
         List[Callable[[pd.DataFrame], pd.DataFrame]]
     ] = None,
@@ -131,6 +136,15 @@ def train_model(
         mlflow.log_metric("train_samples", len(X_train))
         mlflow.log_metric("test_samples", len(X_test))
         mlflow.log_metric("query_time", query_time)
+
+        if feature_importance_extractor is not None:
+            with tempfile.TemporaryDirectory() as td:
+                file_path = os.path.join(td, "feature_importance.json")
+                with open(file_path, "w") as f:
+                    feature_importance = feature_importance_extractor(_reg)
+                    logger.info("Feature importance: %s", feature_importance)
+                    json.dump(feature_importance, f, indent=4)
+                mlflow.log_artifact(file_path)
 
         estimator_path = f"{model}.joblib"
 

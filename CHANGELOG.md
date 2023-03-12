@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.9.3] - 2023-03-12
+### Added
+- Add holidays feature to ETA and availability
+- Add feature importance logging as json artifact
+- Add feature importance extractor for metaestimator
+
+## [2.9.3] - 2023-03-12
 ### Fixed
 - Normalize confusion matrix metrics
 

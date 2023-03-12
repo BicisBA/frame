@@ -6,6 +6,7 @@ SELECT
     num_bikes_disabled::utinyint as num_bikes_disabled,
     num_docks_available::utinyint as num_docks_available,
     num_docks_disabled::utinyint as num_docks_disabled,
+	make_date(year::int, month::int, day::int) as 'date',
     {% for i in minutes_to_eval %}
     minute(
 		lead(

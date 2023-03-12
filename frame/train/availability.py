@@ -1,3 +1,4 @@
+import operator as ops
 from datetime import datetime
 from typing import List, Tuple, Optional
 
@@ -9,6 +10,7 @@ from sklearn.preprocessing import StandardScaler
 
 from frame.utils import get_logger
 from frame.train.train import train_model
+from frame.train.enrich import add_holidays
 from frame.config import cfg, env as CFG_ENV
 from frame.train.transformers import DtypeFixer
 from frame.train.metaestimator import PartitionedMetaEstimator
@@ -31,7 +33,7 @@ AVAILABILITY_NUM_FEATURES: Tuple[str, ...] = (
     "minutes_bt_check",
 )
 
-AVAILABILITY_CAT_FEATURES: Tuple[str, ...] = ("hod", "dow")
+AVAILABILITY_CAT_FEATURES: Tuple[str, ...] = ("hod", "dow", "is_holiday")
 
 AVAILABILITY_PARTITION_COLUMN: str = "station_id"
 
@@ -126,6 +128,7 @@ def train_availability(
         mlflow_tracking_uri=mlflow_tracking_uri,
         test_size=test_size,
         env=env,
-        dataset_transformations=[postprocess_dataset_availability],
+        dataset_transformations=[postprocess_dataset_availability, add_holidays],
+        feature_importance_extractor=ops.attrgetter("feature_importance"),
         minutes_to_eval=minutes_to_eval,
     )

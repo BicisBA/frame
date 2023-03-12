@@ -566,6 +566,26 @@ test = ["Pillow", "matplotlib", "pytest"]
 test-no-images = ["pytest"]
 
 [[package]]
+name = "convertdate"
+version = "2.4.0"
+description = "Converts between Gregorian dates and other calendar systems"
+category = "main"
+optional = false
+python-versions = "<4,>=3.7"
+files = [
+    {file = "convertdate-2.4.0-py3-none-any.whl", hash = "sha256:fcffe3a67522172648cf03b0c3757cfd079726fe5ae04ce29989ad3958039e4e"},
+    {file = "convertdate-2.4.0.tar.gz", hash = "sha256:770c6b2195544d3e451e230b3f1c9b121ed02680b877f896306a04cf6f26b48f"},
+]
+
+[package.dependencies]
+pymeeus = ">=0.3.13,<=1"
+
+[package.extras]
+dev = ["black", "build", "isort", "pylint"]
+docs = ["myst-parser", "sphinx", "sphinx-rtd-theme"]
+tests = ["coverage"]
+
+[[package]]
 name = "cryptography"
 version = "39.0.2"
 description = "cryptography is a package which provides cryptographic recipes and primitives to Python developers."
@@ -1244,6 +1264,38 @@ files = [
 ]
 
 [[package]]
+name = "hijri-converter"
+version = "2.2.4"
+description = "Accurate Hijri-Gregorian dates converter based on the Umm al-Qura calendar"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "hijri-converter-2.2.4.tar.gz", hash = "sha256:9e1d9fa4c220f6867da2abb1a96240675ae974abba951c686a781f4ef6ac218f"},
+    {file = "hijri_converter-2.2.4-py3-none-any.whl", hash = "sha256:5ed4f4c284626e3916cd770e09346d5cc319e2a7762c22357838864908fd6e6d"},
+]
+
+[[package]]
+name = "holidays"
+version = "0.21"
+description = "Generate and work with holidays in Python"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "holidays-0.21-py3-none-any.whl", hash = "sha256:3deb88649ad931e176798b23686798f29215fbf99f56b3f1f4c1e6f0015319ee"},
+    {file = "holidays-0.21.tar.gz", hash = "sha256:e3dece03969056dda9cf52f07676227e7ea042fd22a72ca431203c04029647b6"},
+]
+
+[package.dependencies]
+convertdate = ">=2.3.0"
+hijri-converter = "*"
+korean-lunar-calendar = "*"
+PyMeeus = "*"
+python-dateutil = "*"
+tzdata = {version = "*", markers = "os_name == \"nt\""}
+
+[[package]]
 name = "httptools"
 version = "0.5.0"
 description = "A collection of framework independent HTTP protocol utils."
@@ -1538,6 +1590,18 @@ files = [
     {file = "kiwisolver-1.4.4-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f6cb459eea32a4e2cf18ba5fcece2dbdf496384413bc1bae15583f19e567f3b2"},
     {file = "kiwisolver-1.4.4-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:36dafec3d6d6088d34e2de6b85f9d8e2324eb734162fba59d2ba9ed7a2043d5b"},
     {file = "kiwisolver-1.4.4.tar.gz", hash = "sha256:d41997519fcba4a1e46eb4a2fe31bc12f0ff957b2b81bac28db24744f333e955"},
+]
+
+[[package]]
+name = "korean-lunar-calendar"
+version = "0.3.1"
+description = "Korean Lunar Calendar"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "korean_lunar_calendar-0.3.1-py3-none-any.whl", hash = "sha256:392757135c492c4f42a604e6038042953c35c6f449dda5f27e3f86a7f9c943e5"},
+    {file = "korean_lunar_calendar-0.3.1.tar.gz", hash = "sha256:eb2c485124a061016926bdea6d89efdf9b9fdbf16db55895b6cf1e5bec17b857"},
 ]
 
 [[package]]
@@ -2734,6 +2798,17 @@ spelling = ["pyenchant (>=3.2,<4.0)"]
 testutils = ["gitpython (>3)"]
 
 [[package]]
+name = "pymeeus"
+version = "0.5.12"
+description = "Python implementation of Jean Meeus astronomical routines"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "PyMeeus-0.5.12.tar.gz", hash = "sha256:548f7186bd8b96cbc069cf649a8e8e377dce49ac74486709849fe63a99cad684"},
+]
+
+[[package]]
 name = "pyparsing"
 version = "3.0.9"
 description = "pyparsing module - Classes and methods to define and execute parsing grammars"
@@ -3630,6 +3705,18 @@ mypy-extensions = ">=0.3.0"
 typing-extensions = ">=3.7.4"
 
 [[package]]
+name = "tzdata"
+version = "2022.7"
+description = "Provider of IANA time zone data"
+category = "main"
+optional = false
+python-versions = ">=2"
+files = [
+    {file = "tzdata-2022.7-py2.py3-none-any.whl", hash = "sha256:2b88858b0e3120792a3c0635c23daf36a7d7eeeca657c323da299d2094402a0d"},
+    {file = "tzdata-2022.7.tar.gz", hash = "sha256:fe5f866eddd8b96e9fcba978f8e503c909b19ea7efda11e52e39494bad3a7bfa"},
+]
+
+[[package]]
 name = "urllib3"
 version = "1.26.14"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
@@ -4110,4 +4197,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.9"
-content-hash = "4468968aa54d1e6299806d9a29003490eec8104ad56d2e0f49708e7b5d118f5f"
+content-hash = "7644ca91a19f4313b39e80e59e50dbab80382db1f2f69fa4f42cedc565bef369"

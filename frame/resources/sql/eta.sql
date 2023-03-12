@@ -5,6 +5,7 @@ SELECT
     num_docks_available::utinyint as num_docks_available,
     num_docks_disabled::utinyint as num_docks_disabled,
     hour::int as hod,
+	make_date(year::int, month::int, day::int) as 'date',
     dayofweek(make_timestamp(year::int, month::int, day::int, hour::int, minute::int, 0.0))::utinyint as dow,
     LEAST(
 		date_diff(
