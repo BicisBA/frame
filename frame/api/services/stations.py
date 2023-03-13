@@ -2,6 +2,7 @@
 from typing import List
 from datetime import datetime
 
+import holidays
 from sqlalchemy.orm import Session
 
 from frame.utils import get_logger
@@ -17,6 +18,8 @@ from frame.exceptions import (
 )
 
 logger = get_logger(__name__)
+
+AR_HOLIDAYS = holidays.AR()
 
 
 def get_stations(db: Session) -> List[Station]:
@@ -144,6 +147,7 @@ def predict(
             "num_bikes_disabled": station_status.num_bikes_disabled,
             "num_docks_available": station_status.num_docks_available,
             "num_docks_disabled": station_status.num_docks_disabled,
+            "is_holiday": current_time.date() in AR_HOLIDAYS,
         }
         bike_eta = eta_predictor.predict(**eta_features)
     except UninitializedPredictor:
@@ -160,6 +164,7 @@ def predict(
             "num_docks_available": station_status.num_docks_available,
             "num_docks_disabled": station_status.num_docks_disabled,
             "minutes_bt_check": prediction_params.user_eta,
+            "is_holiday": current_time.date() in AR_HOLIDAYS,
         }
         availability_probability = availability_predictor.predict(
             **availability_features
