@@ -1,14 +1,11 @@
 """Logic for stations."""
-from typing import List
 from datetime import datetime
+from typing import List
 
-import holidays
 from sqlalchemy.orm import Session
 
-from frame.utils import get_logger
 from frame.api.dependencies import MLFlowPredictor
 from frame.api.schemas.stations import PredictionParams
-from frame.models import Station, Prediction, StationStatus
 from frame.data.ecobici import fetch_stations_info, fetch_stations_status
 from frame.exceptions import (
     PredictionError,
@@ -16,10 +13,11 @@ from frame.exceptions import (
     StationDoesNotExist,
     UninitializedPredictor,
 )
+from frame.models import Station, Prediction, StationStatus
+from frame.utils import get_logger
 
 logger = get_logger(__name__)
 
-AR_HOLIDAYS = holidays.AR()
 
 
 def get_stations(db: Session) -> List[Station]:
@@ -147,7 +145,7 @@ def predict(
             "num_bikes_disabled": station_status.num_bikes_disabled,
             "num_docks_available": station_status.num_docks_available,
             "num_docks_disabled": station_status.num_docks_disabled,
-            "is_holiday": current_time.date() in AR_HOLIDAYS,
+            "ts": current_time
         }
         bike_eta = eta_predictor.predict(**eta_features)
     except UninitializedPredictor:
@@ -164,7 +162,7 @@ def predict(
             "num_docks_available": station_status.num_docks_available,
             "num_docks_disabled": station_status.num_docks_disabled,
             "minutes_bt_check": prediction_params.user_eta,
-            "is_holiday": current_time.date() in AR_HOLIDAYS,
+            "ts": current_time
         }
         availability_probability = availability_predictor.predict(
             **availability_features

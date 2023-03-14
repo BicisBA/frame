@@ -1,25 +1,21 @@
-import os
-import json
-import time
-import tempfile
-import operator as ops
 from datetime import datetime, timedelta
+import json
+import operator as ops
+import os
+import tempfile
+import time
 from typing import Dict, List, Tuple, Union, Callable, Optional
 
 import duckdb
 import joblib
 import mlflow
-import pandas as pd
-from sklearn.pipeline import Pipeline
-from sklearn.base import BaseEstimator
 from mlflow.tracking import MlflowClient
+import pandas as pd
+from sklearn.base import BaseEstimator
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
 
-from frame.data.datalake import connect
-from frame.ycm_casts import s3_or_local
-from frame.utils import with_env, get_logger
 from frame import __version__ as frame_version
-from frame.jinja import load_sql_query, render_sql_query
 from frame.config import JOBLIB_COMPRESSION, cfg, env as CFG_ENV
 from frame.constants import (
     MODELS_QUERIES,
@@ -28,6 +24,10 @@ from frame.constants import (
     MLFlowStage,
     Environments,
 )
+from frame.data.datalake import connect
+from frame.jinja import load_sql_query, render_sql_query
+from frame.utils import with_env, get_logger
+from frame.ycm_casts import s3_or_local
 
 logger = get_logger(__name__)
 
@@ -129,7 +129,10 @@ def train_model(
 
         logger.info("Logging metrics")
         if metrics is not None:
-            preds = estimator.predict(X_test)
+            try:
+                preds = estimator.predict(X_test)
+            except:
+                breakpoint()
             for metric in metrics:
                 mlflow.log_metric(metric.__name__, metric(y_test, preds))
 
