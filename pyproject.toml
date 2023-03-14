@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "frame"
-version = "2.10.1"
+version = "2.11.0"
 description = "Backend for BicisBA."
 authors = ["CrossNox <ijmermet@gmail.com>"]
 license = "MIT"

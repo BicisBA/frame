@@ -1,18 +1,13 @@
-import operator as ops
 from datetime import datetime
+import operator as ops
 from typing import Tuple, Optional
 
 from lightgbm import LGBMRegressor
-from sklearn.pipeline import make_pipeline
 from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import make_union, make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from frame.utils import get_logger
-from frame.train.train import train_model
-from frame.train.enrich import add_holidays
 from frame.config import cfg, env as CFG_ENV
-from frame.train.transformers import DtypeFixer
-from frame.train.metaestimator import PartitionedMetaEstimator
 from frame.constants import (
     METRICS_MAPPING,
     DEFAULT_TEST_SIZE,
@@ -20,6 +15,15 @@ from frame.constants import (
     FrameModels,
     Environments,
 )
+from frame.train.metaestimator import PartitionedMetaEstimator
+from frame.train.train import train_model
+from frame.train.transformers import (
+    DtypeFixer,
+    AddHolidays,
+    AddNearbyStationsData,
+    filter_current_stations,
+)
+from frame.utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -31,7 +35,9 @@ ETA_NUM_FEATURES: Tuple[str, ...] = (
     "num_docks_disabled",
 )
 
-ETA_CAT_FEATURES: Tuple[str, ...] = ("hod", "dow", "is_holiday")
+ETA_CAT_FEATURES: Tuple[str, ...] = ("hod", "dow")
+
+ETA_PASSTHROUGH_FEATURES: Tuple[str, ...] = tuple()
 
 PARTITION_COLUMN: str = "station_id"
 
@@ -51,26 +57,33 @@ def train_eta(
     partition_column: str = PARTITION_COLUMN,
     env: Environments = CFG_ENV,
 ):
-
     pipeline = make_pipeline(
-        ColumnTransformer(
-            [
-                (
-                    "dtype_fixer",
-                    DtypeFixer(dtype="category"),
-                    [*cat_features],
-                ),
-                (
-                    "ss",
-                    StandardScaler(),
-                    [*num_features],
-                ),
-                ("passthrough", "passthrough", [partition_column]),
-            ],
-            verbose_feature_names_out=False,
+        make_union(
+            ColumnTransformer(
+                [
+                    (
+                        "dtype_fixer",
+                        DtypeFixer(dtype="category"),
+                        [*cat_features],
+                    ),
+                    (
+                        "ss",
+                        StandardScaler(),
+                        [*num_features],
+                    ),
+                    (
+                        "passthrough",
+                        "passthrough",
+                        [partition_column],
+                    ),
+                ],
+                verbose_feature_names_out=False,
+            ),
+            AddNearbyStationsData(num_features, K=2),
+            AddHolidays(),
         ),
         PartitionedMetaEstimator(
-            LGBMRegressor(n_estimators=50, objective="regression_l1"), partition_column
+            LGBMRegressor(n_estimators=2, objective="regression_l1"), partition_column
         ),
     )
     pipeline.set_output(transform="pandas")
@@ -87,6 +100,6 @@ def train_eta(
         mlflow_tracking_uri=mlflow_tracking_uri,
         test_size=test_size,
         env=env,
-        dataset_transformations=[add_holidays],
+        dataset_transformations=[filter_current_stations],
         feature_importance_extractor=ops.attrgetter("feature_importance"),
     )
