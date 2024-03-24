@@ -35,7 +35,7 @@ logger = get_logger(__name__)
 @with_env(
     MLFLOW_TRACKING_USERNAME=cfg.mlflow.username(),
     MLFLOW_TRACKING_PASSWORD=cfg.mlflow.password(),
-    MLFLOW_TRACKING_SERVER_CERT_PATH=cfg.mlflow.cert_path(cast=s3_or_local),
+    # MLFLOW_TRACKING_SERVER_CERT_PATH=cfg.mlflow.cert_path(cast=s3_or_local),
 )
 def train_model(
     model: FrameModels,
