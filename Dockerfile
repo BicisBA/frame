@@ -9,5 +9,6 @@ RUN poetry install --no-interaction --no-root
 
 COPY . /app
 
+RUN poetry run pip install -U pip
 RUN poetry install --no-interaction
 RUN poetry run pip install uvicorn
