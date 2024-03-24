@@ -1,6 +1,6 @@
 FROM python:3.9
 
-RUN pip install poetry
+RUN pip install poetry==1.8.2
 RUN poetry config virtualenvs.create false
 
 COPY pyproject.toml /app/
