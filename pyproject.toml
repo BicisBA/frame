@@ -36,6 +36,7 @@ lightgbm = "^3.3.5"
 fastapi-cache2 = {extras = ["redis"], version = "^0.2.1"}
 types-redis = "^4.5.1.4"
 holidays = "^0.21"
+scikit-learn = "1.2.1"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
