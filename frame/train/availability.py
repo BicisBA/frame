@@ -1,19 +1,14 @@
-import operator as ops
 from datetime import datetime
+import operator as ops
 from typing import List, Tuple, Optional
 
-import pandas as pd
 from lightgbm import LGBMClassifier
-from sklearn.pipeline import make_pipeline
+import pandas as pd
 from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from frame.utils import get_logger
-from frame.train.train import train_model
-from frame.train.enrich import add_holidays
 from frame.config import cfg, env as CFG_ENV
-from frame.train.transformers import DtypeFixer
-from frame.train.metaestimator import PartitionedMetaEstimator
 from frame.constants import (
     METRICS_MAPPING,
     DEFAULT_TEST_SIZE,
@@ -21,6 +16,10 @@ from frame.constants import (
     FrameModels,
     Environments,
 )
+from frame.train.metaestimator import PartitionedMetaEstimator
+from frame.train.train import train_model
+from frame.train.transformers import DtypeFixer, AddHolidays
+from frame.utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -105,6 +104,7 @@ def train_availability(
             ],
             verbose_feature_names_out=False,
         ),
+        AddHolidays(),
         PartitionedMetaEstimator(
             LGBMClassifier(
                 class_weight={0: neg_weight or 1, 1: pos_weight or 1},
@@ -128,7 +128,7 @@ def train_availability(
         mlflow_tracking_uri=mlflow_tracking_uri,
         test_size=test_size,
         env=env,
-        dataset_transformations=[postprocess_dataset_availability, add_holidays],
+        dataset_transformations=[postprocess_dataset_availability],
         feature_importance_extractor=ops.attrgetter("feature_importance"),
         minutes_to_eval=minutes_to_eval,
     )
